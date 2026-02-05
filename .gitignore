@@ -1,0 +1,17 @@
+.assets
+.env
+config.json
+*.pyc
+dist/
+build/
+docs/
+*.egg-info/
+*.egg
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzz
+poetry.lock
