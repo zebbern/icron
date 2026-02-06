@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="nanobot_logo.png" alt="icron" width="500">
-  <h1>icron the `lightweight` Personal AI Assistant</h1>
+  <img src="" alt="icron" width="500">
+  <h1>icron your lightweight Personal AI Assistant</h1>
 </div>
 
 **icron** is a **lightweight** personal AI assistant designed for simplicity and extensibility.
@@ -14,12 +14,20 @@ Built with Python, it supports multiple chat channels (Discord, Telegram, WhatsA
 | **Code Search** | `glob` (find files), `grep` (search content) |
 | **Shell Execution** | `exec` (run commands with safety controls) |
 | **Web Access** | `web_search` (Brave API), `web_fetch` (extract content) |
-| **Memory** | `memory_store`, `memory_search`, `memory_list`, `memory_delete` |
+| **Memory** | `memory_search`, `memory_write`, `memory_get`, `memory_list` |
 | **Scheduling** | `reminder_set`, `reminder_list`, `reminder_cancel` |
 | **Slash Commands** | `/help`, `/sessions`, `/session`, `/remind`, `/search`, `/memory` |
 | **Screenshots** | `screenshot` (capture web pages with Playwright) |
 | **Subagents** | `spawn` (background task delegation) |
 | **MCP** | Connect external MCP servers for unlimited extensibility |
+
+## ✨ Key Features
+
+- **Semantic Memory**: OpenClaw-style permanent Markdown memory with hybrid BM25 + vector search. Auto-detects embedding providers (OpenAI, Gemini, Ollama).
+- **Multi-Channel**: Chat through Discord, Telegram, or WhatsApp with unified conversation history.
+- **LLM Flexibility**: Works with any OpenAI-compatible provider including local vLLM/Ollama.
+- **MCP Integration**: Extend capabilities by connecting external MCP servers.
+- **Skills System**: Modular task automation with built-in and custom skills.
 
 ## 📦 Install
 

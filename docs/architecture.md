@@ -113,6 +113,38 @@ icron/
     └── helpers.py   # Path validation, utilities
 ```
 
+## Memory System
+
+Icron features an OpenClaw-style semantic memory system for persistent, searchable knowledge storage.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Memory System                             │
+├─────────────────────────────────────────────────────────────┤
+│  MemoryStore (store.py)                                      │
+│  • MEMORY.md - Curated long-term memory (never auto-trimmed)│
+│  • Daily logs (memory/YYYY-MM-DD.md) - Append-only notes    │
+│  • Markdown format for human readability                     │
+├─────────────────────────────────────────────────────────────┤
+│  VectorIndex (index.py)                                      │
+│  • sqlite-vec for vector storage (fallback: Python cosine)  │
+│  • Hybrid search: BM25 keyword + vector similarity          │
+│  • Automatic chunking and indexing                          │
+├─────────────────────────────────────────────────────────────┤
+│  EmbeddingProviders (embeddings.py)                          │
+│  • Auto-detect: OpenAI → Gemini → Ollama → Local            │
+│  • Configurable embedding model                              │
+│  • Graceful fallback chain                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Memory Architecture
+
+- **Permanent Storage**: Unlike conversation history, memories are never auto-summarized or trimmed
+- **Hybrid Search**: Combines BM25 keyword matching with vector similarity for accurate retrieval
+- **Provider Flexibility**: Auto-detects available embedding provider from configured LLM providers
+- **Human-Readable**: All memories stored as Markdown files for easy inspection and editing
+
 ## Data Flow
 
 1. **Request** → Gateway receives user message

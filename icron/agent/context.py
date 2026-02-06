@@ -3,10 +3,15 @@
 import base64
 import mimetypes
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from icron.agent.memory import MemoryStore
 from icron.agent.skills import SkillsLoader
+
+if TYPE_CHECKING:
+    from icron.memory.store import MemoryStore as SemanticMemoryStore
+    from icron.memory.index import VectorIndex
+    from icron.memory.embeddings import EmbeddingProvider
 
 
 class ContextBuilder:
@@ -19,10 +24,21 @@ class ContextBuilder:
     
     BOOTSTRAP_FILES = ["AGENTS.md", "SOUL.md", "USER.md", "TOOLS.md", "IDENTITY.md"]
     
-    def __init__(self, workspace: Path):
+    def __init__(
+        self,
+        workspace: Path,
+        semantic_memory_store: "SemanticMemoryStore | None" = None,
+        memory_index: "VectorIndex | None" = None,
+        embedding_provider: "EmbeddingProvider | None" = None,
+    ):
         self.workspace = workspace
         self.memory = MemoryStore(workspace)
         self.skills = SkillsLoader(workspace)
+        
+        # Semantic memory components (optional)
+        self.semantic_memory_store = semantic_memory_store
+        self.memory_index = memory_index
+        self.embedding_provider = embedding_provider
     
     def build_system_prompt(self, skill_names: list[str] | None = None) -> str:
         """

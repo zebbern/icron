@@ -108,6 +108,69 @@ result = screenshot(url="https://github.com/user")
 message(content="Here's the screenshot!", media=["/workspace/media/screenshots/screenshot_xxx.png"])
 ```
 
+## Memory
+
+Icron provides semantic memory tools for persistent knowledge storage. Memories are stored as Markdown files and indexed for semantic search.
+
+### memory_search
+Semantic search across all memories using hybrid BM25 + vector search.
+```
+memory_search(query: str, limit: int = 5) -> str
+```
+
+**Parameters:**
+- `query`: Natural language search query
+- `limit`: Maximum number of results to return (default: 5)
+
+**Example:**
+```python
+memory_search(query="user preferences for code style")
+```
+
+### memory_write
+Save content to MEMORY.md or today's daily log.
+```
+memory_write(content: str, to_daily: bool = False) -> str
+```
+
+**Parameters:**
+- `content`: The content to save (Markdown supported)
+- `to_daily`: If True, append to daily log (memory/YYYY-MM-DD.md); if False, append to MEMORY.md
+
+**Example:**
+```python
+# Save to curated long-term memory
+memory_write(content="User prefers TypeScript over JavaScript")
+
+# Save to daily log
+memory_write(content="Discussed project architecture", to_daily=True)
+```
+
+### memory_get
+Read a specific memory file.
+```
+memory_get(filename: str = "MEMORY.md") -> str
+```
+
+**Parameters:**
+- `filename`: Name of file to read (default: MEMORY.md)
+
+**Example:**
+```python
+memory_get()  # Read MEMORY.md
+memory_get(filename="2026-02-06.md")  # Read specific daily log
+```
+
+### memory_list
+List all memory files in the workspace.
+```
+memory_list() -> str
+```
+
+Returns a list of all memory files including MEMORY.md and daily logs.
+
+---
+
 ## Background Tasks
 
 ### spawn

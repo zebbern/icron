@@ -107,5 +107,15 @@
         }
       }
     }
+  },
+  "memory": {
+    "enabled": true,
+    "embeddingProvider": "auto",
+    "embeddingModel": null,
+    "search": {
+      "hybridEnabled": true,
+      "vectorWeight": 0.7,
+      "maxResults": 10
+    }
   }
 }

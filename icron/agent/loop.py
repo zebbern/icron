@@ -12,6 +12,11 @@ if TYPE_CHECKING:
     from icron.mcp.tool_adapter import MCPManager
     from icron.cron.service import CronService
 
+# Memory system imports
+from icron.memory.store import MemoryStore
+from icron.memory.index import VectorIndex
+from icron.memory.embeddings import get_embedding_provider, EmbeddingProvider
+
 from icron.bus.events import InboundMessage, OutboundMessage
 from icron.bus.queue import MessageBus
 from icron.providers.base import LLMProvider
@@ -27,7 +32,12 @@ from icron.agent.tools.web import WebSearchTool, WebFetchTool
 from icron.agent.tools.screenshot import ScreenshotTool
 from icron.agent.tools.message import MessageTool
 from icron.agent.tools.spawn import SpawnTool
-from icron.agent.tools.memory_tools import RememberTool, RecallTool, NoteTodayTool
+from icron.agent.tools.memory_tools import (
+    MemorySearchTool,
+    MemoryWriteTool,
+    MemoryGetTool,
+    MemoryListTool,
+)
 from icron.agent.tools.reminder_tools import ReminderTool, ListRemindersool, CancelReminderTool
 from icron.agent.subagent import SubagentManager
 from icron.agent.commands import CommandHandler
@@ -82,6 +92,11 @@ class AgentLoop:
             exec_config=self.exec_config,
         )
         self.mcp_manager: "MCPManager | None" = None
+        
+        # Memory system components (initialized async in initialize())
+        self.memory_store: MemoryStore | None = None
+        self.memory_index: VectorIndex | None = None
+        self.embedding_provider: EmbeddingProvider | None = None
         
         self._running = False
         self._initialized = False
@@ -163,10 +178,11 @@ class AgentLoop:
         spawn_tool = SpawnTool(manager=self.subagents)
         self.tools.register(spawn_tool)
         
-        # Memory tools
-        self.tools.register(RememberTool(workspace=self.workspace))
-        self.tools.register(RecallTool(workspace=self.workspace))
-        self.tools.register(NoteTodayTool(workspace=self.workspace))
+        # Semantic memory tools
+        self.tools.register(MemorySearchTool(workspace=self.workspace))
+        self.tools.register(MemoryWriteTool(workspace=self.workspace))
+        self.tools.register(MemoryGetTool(workspace=self.workspace))
+        self.tools.register(MemoryListTool(workspace=self.workspace))
         
         # Reminder tools (cron-based)
         self._reminder_tool = ReminderTool(cron_service=self.cron_service)
@@ -201,7 +217,143 @@ class AgentLoop:
                 logger.error(f"Failed to initialize MCP: {e}")
                 # Continue without MCP
 
+        # Initialize memory system
+        await self._init_memory()
+
         self._initialized = True
+
+    async def _init_memory(self) -> None:
+        """Initialize the memory system components."""
+        try:
+            # Check if memory is enabled (default: True)
+            memory_enabled = getattr(self.exec_config, 'memory_enabled', True)
+            if not memory_enabled:
+                logger.info("Memory system disabled by config")
+                return
+
+            # Create MemoryStore
+            self.memory_store = MemoryStore(self.workspace)
+            logger.debug(f"MemoryStore initialized at {self.workspace}")
+
+            # Get embedding provider
+            try:
+                self.embedding_provider = await get_embedding_provider()
+                logger.debug(f"Embedding provider initialized (dimension={self.embedding_provider.dimension})")
+            except ValueError as e:
+                logger.warning(f"Could not initialize embedding provider: {e}")
+                logger.info("Memory system will work without semantic search")
+                return
+
+            # Create VectorIndex
+            db_path = self.workspace / "memory" / ".vector_index.db"
+            self.memory_index = VectorIndex(db_path, dimension=self.embedding_provider.dimension)
+            logger.debug(f"VectorIndex initialized at {db_path}")
+
+            # Index existing memory files in background
+            asyncio.create_task(self._index_memory_files())
+            logger.info("Memory system initialized successfully")
+
+        except Exception as e:
+            logger.error(f"Failed to initialize memory system: {e}")
+            # Continue without memory - tools will handle gracefully
+
+    async def _index_memory_files(self) -> None:
+        """Index all memory markdown files for semantic search."""
+        if not self.memory_index or not self.embedding_provider:
+            return
+
+        try:
+            memory_dir = self.workspace / "memory"
+            if not memory_dir.exists():
+                return
+
+            # Find all markdown files in memory directory
+            md_files = list(memory_dir.glob("**/*.md"))
+            
+            # Also include MEMORY.md from workspace root
+            root_memory = self.workspace / "MEMORY.md"
+            if root_memory.exists():
+                md_files.append(root_memory)
+
+            indexed_count = 0
+            for md_file in md_files:
+                # Skip hidden files and index database
+                if md_file.name.startswith("."):
+                    continue
+
+                try:
+                    content = md_file.read_text(encoding="utf-8")
+                    if not content.strip():
+                        continue
+
+                    # Split content into chunks (by paragraphs or sections)
+                    chunks = self._chunk_content(content, str(md_file))
+                    
+                    for chunk_text, start_line, end_line in chunks:
+                        # Generate embedding
+                        embedding = await self.embedding_provider.embed(chunk_text)
+                        
+                        # Store in index
+                        self.memory_index.add_chunk(
+                            file_path=str(md_file.relative_to(self.workspace)),
+                            text=chunk_text,
+                            embedding=embedding,
+                            start_line=start_line,
+                            end_line=end_line,
+                        )
+                        indexed_count += 1
+
+                except Exception as e:
+                    logger.warning(f"Failed to index {md_file}: {e}")
+
+            logger.info(f"Indexed {indexed_count} chunks from {len(md_files)} memory files")
+
+        except Exception as e:
+            logger.error(f"Error during memory indexing: {e}")
+
+    def _chunk_content(self, content: str, file_path: str) -> list[tuple[str, int, int]]:
+        """Split content into indexable chunks.
+        
+        Args:
+            content: The text content to chunk.
+            file_path: Path to the file (for logging).
+            
+        Returns:
+            List of (chunk_text, start_line, end_line) tuples.
+        """
+        chunks = []
+        lines = content.split("\n")
+        
+        # Simple chunking: split by double newlines (paragraphs) or headers
+        current_chunk = []
+        chunk_start = 1
+        
+        for i, line in enumerate(lines, start=1):
+            # Start new chunk on headers or after empty lines following content
+            if line.startswith("#") and current_chunk:
+                chunk_text = "\n".join(current_chunk).strip()
+                if chunk_text and len(chunk_text) > 20:  # Skip tiny chunks
+                    chunks.append((chunk_text, chunk_start, i - 1))
+                current_chunk = [line]
+                chunk_start = i
+            else:
+                current_chunk.append(line)
+            
+            # Also chunk if current chunk gets too large (>500 chars)
+            chunk_text = "\n".join(current_chunk)
+            if len(chunk_text) > 500:
+                if chunk_text.strip() and len(chunk_text.strip()) > 20:
+                    chunks.append((chunk_text.strip(), chunk_start, i))
+                current_chunk = []
+                chunk_start = i + 1
+        
+        # Don't forget the last chunk
+        if current_chunk:
+            chunk_text = "\n".join(current_chunk).strip()
+            if chunk_text and len(chunk_text) > 20:
+                chunks.append((chunk_text, chunk_start, len(lines)))
+        
+        return chunks
 
     async def shutdown(self) -> None:
         """Shutdown async components including MCP."""
@@ -374,7 +526,11 @@ class AgentLoop:
                 for tool_call in response.tool_calls:
                     args_str = json.dumps(tool_call.arguments)
                     logger.debug(f"Executing tool: {tool_call.name} with arguments: {args_str}")
-                    result = await self.tools.execute(tool_call.name, tool_call.arguments)
+                    # Pass memory components to tools that need them
+                    tool_kwargs = dict(tool_call.arguments)
+                    tool_kwargs["vector_index"] = self.memory_index
+                    tool_kwargs["embedding_provider"] = self.embedding_provider
+                    result = await self.tools.execute(tool_call.name, tool_kwargs)
                     messages = self.context.add_tool_result(
                         messages, tool_call.id, tool_call.name, result
                     )
@@ -481,7 +637,11 @@ class AgentLoop:
                 for tool_call in response.tool_calls:
                     args_str = json.dumps(tool_call.arguments)
                     logger.debug(f"Executing tool: {tool_call.name} with arguments: {args_str}")
-                    result = await self.tools.execute(tool_call.name, tool_call.arguments)
+                    # Pass memory components to tools that need them
+                    tool_kwargs = dict(tool_call.arguments)
+                    tool_kwargs["vector_index"] = self.memory_index
+                    tool_kwargs["embedding_provider"] = self.embedding_provider
+                    result = await self.tools.execute(tool_call.name, tool_kwargs)
                     messages = self.context.add_tool_result(
                         messages, tool_call.id, tool_call.name, result
                     )

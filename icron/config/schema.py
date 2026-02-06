@@ -169,6 +169,21 @@ class ToolsConfig(BaseModel):
     mcp: MCPConfig = MCPConfig()
 
 
+class MemorySearchConfig(BaseModel):
+    """Configuration for memory search."""
+    hybrid_enabled: bool = True
+    vector_weight: float = 0.7
+    max_results: int = 10
+
+
+class MemoryConfig(BaseModel):
+    """Configuration for semantic memory system."""
+    enabled: bool = True
+    embedding_provider: str = "auto"  # auto, openai, gemini, ollama, local
+    embedding_model: str | None = None  # Override default model
+    search: MemorySearchConfig = MemorySearchConfig()
+
+
 class Config(BaseSettings):
     """Root configuration for icron."""
     agents: AgentsConfig = AgentsConfig()
@@ -176,6 +191,7 @@ class Config(BaseSettings):
     providers: ProvidersConfig = ProvidersConfig()
     gateway: GatewayConfig = GatewayConfig()
     tools: ToolsConfig = ToolsConfig()
+    memory: MemoryConfig = MemoryConfig()
     
     @property
     def workspace_path(self) -> Path:
