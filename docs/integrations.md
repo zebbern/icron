@@ -110,8 +110,58 @@ fetch_url("https://spa-site.com", use_playwright=True)
 
 Setup:
 ```bash
+pip install playwright
 playwright install chromium
 ```
+
+## Screenshot Tool
+
+Capture screenshots of web pages using Playwright's headless Chromium browser.
+
+### Tool: `screenshot`
+
+**Description:** Capture a screenshot of a web page. Returns the file path for attachment. Supports full-page screenshots and custom viewport dimensions.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `url` | string | ✅ | - | URL of the web page to capture (must be http/https) |
+| `full_page` | boolean | ❌ | `false` | Capture the full scrollable page |
+| `width` | integer | ❌ | `1280` | Viewport width in pixels (320-3840) |
+| `height` | integer | ❌ | `720` | Viewport height in pixels (240-2160) |
+
+### Usage Examples
+
+**Basic screenshot:**
+```
+"Take a screenshot of https://example.com"
+```
+
+**Full page capture:**
+```
+"Capture a full page screenshot of https://github.com"
+```
+
+**Custom dimensions:**
+```
+"Screenshot https://mobile-site.com with width 375 and height 812" (iPhone dimensions)
+```
+
+### Setup Requirements
+
+```bash
+pip install playwright
+playwright install chromium
+```
+
+### Output
+
+Screenshots are saved to `workspace/media/screenshots/` with auto-generated filenames:
+- Format: `screenshot_{timestamp}_{url_hash}.png`
+- Example: `screenshot_20260206_143022_a1b2c3d4.png`
+
+The tool returns the relative path for easy attachment in chat responses.
 
 ## External Services
 

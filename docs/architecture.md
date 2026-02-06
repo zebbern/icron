@@ -21,6 +21,16 @@ Icron is a Python-based AI agent framework with a modular architecture designed 
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
+│                  Command Handler (commands.py)               │
+├─────────────────────────────────────────────────────────────┤
+│  • Handles slash commands (/help, /sessions, /skills, etc.) │
+│  • Manages message templates                                 │
+│  • Routes delegated commands to agent                        │
+│  • Provides instant responses for session management         │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
 │                    Agent Loop (loop.py)                      │
 ├─────────────────────────────────────────────────────────────┤
 │  • Manages conversation flow                                 │
@@ -38,8 +48,19 @@ Icron is a Python-based AI agent framework with a modular architecture designed 
 │ • Shell tools   │  │ • Token mgmt    │  │ • OpenAI        │
 │ • Memory tools  │  │ • Persistence   │  │ • vLLM          │
 │ • Web tools     │  │                 │  │ • Ollama        │
-│ • Spawn tools   │  │                 │  │                 │
+│ • Spawn tools   │  │                 │  │ • Gemini        │
+│ • Screenshot    │  │                 │  │                 │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Skills Loader (skills.py)                  │
+├─────────────────────────────────────────────────────────────┤
+│  • Loads skill definitions from SKILL.md files               │
+│  • Provides builtin skills (weather, github, summarize)      │
+│  • Supports workspace-level custom skills                    │
+│  • Validates skill requirements/dependencies                 │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ## Directory Structure
@@ -48,27 +69,48 @@ Icron is a Python-based AI agent framework with a modular architecture designed 
 icron/
 ├── agent/           # Core agent loop and orchestration
 │   ├── loop.py      # Main agent processing loop
-│   └── subagent.py  # Background task execution
+│   ├── commands.py  # Slash command handler & templates
+│   ├── context.py   # System prompt builder
+│   ├── memory.py    # Persistent memory
+│   ├── skills.py    # Skills loader
+│   ├── subagent.py  # Background task execution
+│   └── tools/       # Built-in tools
+├── bus/             # Message routing
+│   ├── events.py    # Event definitions
+│   └── queue.py     # Message queue
+├── channels/        # Chat channel integrations
+│   ├── discord.py   # Discord bot
+│   ├── telegram.py  # Telegram bot
+│   ├── whatsapp.py  # WhatsApp bridge
+│   └── manager.py   # Channel coordinator
+├── cli/             # CLI commands
+│   └── commands.py  # setup, validate, agent, gateway, etc.
 ├── config/          # Configuration management
+│   ├── loader.py    # Config file loading
 │   └── schema.py    # Pydantic models for config
-├── gateway/         # Web server and API
-│   └── app.py       # Flask application
-├── llm/             # LLM provider integrations
-│   ├── anthropic.py # Claude integration
-│   ├── openai.py    # OpenAI/vLLM integration
-│   └── ollama.py    # Ollama integration
+├── cron/            # Scheduled task execution
+│   ├── service.py   # Cron service
+│   └── types.py     # Job definitions
+├── heartbeat/       # Proactive task checking
+│   └── service.py   # Heartbeat service
+├── mcp/             # MCP server integration
+│   ├── client.py    # MCP client
+│   └── tool_adapter.py # Tool wrapper
+├── providers/       # LLM provider integrations
+│   ├── anthropic_provider.py
+│   ├── openai_provider.py
+│   ├── gemini_provider.py
+│   └── factory.py   # Provider factory
 ├── session/         # Session and history management
 │   └── manager.py   # Conversation history, token trimming
-├── tools/           # Tool implementations
-│   ├── file/        # File operations (read, write, edit)
-│   ├── memory/      # Persistent memory tools
-│   ├── reminder/    # Scheduled reminders
-│   ├── shell/       # Shell command execution
-│   ├── spawn/       # Background task delegation
-│   └── web/         # Web fetching (httpx + Playwright)
+├── skills/          # Built-in skills
+│   ├── weather/     # Weather lookups
+│   ├── github/      # GitHub operations
+│   ├── summarize/   # Content summarization
+│   └── tmux/        # Tmux session control
 └── utils/           # Shared utilities
     ├── tokens.py    # Token counting
-    └── security.py  # Path validation
+    └── helpers.py   # Path validation, utilities
 ```
 
 ## Data Flow

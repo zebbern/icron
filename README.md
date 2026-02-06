@@ -1,40 +1,10 @@
 <div align="center">
   <img src="nanobot_logo.png" alt="icron" width="500">
-  <h1>icron: Ultra-Lightweight Personal AI Assistant</h1>
+  <h1>icron the `lightweight` Personal AI Assistant</h1>
 </div>
 
-🐈 **icron** is an **ultra-lightweight** personal AI assistant designed for simplicity and extensibility.
-
-⚡️ Delivers core agent functionality in just **~4,000** lines of Python code.
-
-## 🏗️ Architecture
-
-<p align="center">
-  <img src="nanobot_arch.png" alt="icron architecture" width="800">
-</p>
-
-## ✨ Features
-
-<table align="center">
-  <tr align="center">
-    <th><p align="center">📈 Web Search & Research</p></th>
-    <th><p align="center">🚀 Code Assistant</p></th>
-    <th><p align="center">📅 Reminders & Scheduling</p></th>
-    <th><p align="center">📚 Persistent Memory</p></th>
-  </tr>
-  <tr>
-    <td align="center"><p align="center"><img src="case/search.gif" width="180" height="400"></p></td>
-    <td align="center"><p align="center"><img src="case/code.gif" width="180" height="400"></p></td>
-    <td align="center"><p align="center"><img src="case/scedule.gif" width="180" height="400"></p></td>
-    <td align="center"><p align="center"><img src="case/memory.gif" width="180" height="400"></p></td>
-  </tr>
-  <tr>
-    <td align="center">Search • Fetch • Analyze</td>
-    <td align="center">Read • Write • Execute</td>
-    <td align="center">Reminders • Cron • Tasks</td>
-    <td align="center">Store • Search • Recall</td>
-  </tr>
-</table>
+**icron** is a **lightweight** personal AI assistant designed for simplicity and extensibility.
+Built with Python, it supports multiple chat channels (Discord, Telegram, WhatsApp) and can connect to any OpenAI-compatible LLM provider (Anthropic, OpenRouter, Together, Groq, vLLM). With a modular architecture and built-in tools for file operations, web search, shell execution, memory, and scheduling, icron is your personal assistant for research, coding, reminders, and more.
 
 ### Core Capabilities
 
@@ -46,6 +16,8 @@
 | **Web Access** | `web_search` (Brave API), `web_fetch` (extract content) |
 | **Memory** | `memory_store`, `memory_search`, `memory_list`, `memory_delete` |
 | **Scheduling** | `reminder_set`, `reminder_list`, `reminder_cancel` |
+| **Slash Commands** | `/help`, `/sessions`, `/session`, `/remind`, `/search`, `/memory` |
+| **Screenshots** | `screenshot` (capture web pages with Playwright) |
 | **Subagents** | `spawn` (background task delegation) |
 | **MCP** | Connect external MCP servers for unlimited extensibility |
 
@@ -67,9 +39,13 @@ pip install icron
 
 ## 🚀 Quick Start
 
-**1. Initialize**
+**1. Initialize** (choose one)
 
 ```bash
+# Guided setup wizard (recommended for first-time users)
+icron setup
+
+# Or quick initialization
 icron onboard
 ```
 
@@ -96,7 +72,7 @@ icron onboard
 icron agent -m "What is 2+2?"
 ```
 
-## �️ Local Models (vLLM)
+## Local Models (vLLM)
 
 Run icron with your own local models using vLLM or any OpenAI-compatible server.
 
@@ -132,7 +108,7 @@ icron agent -m "Hello from my local LLM!"
 
 > The `apiKey` can be any non-empty string for local servers.
 
-## �💬 Chat Channels
+## 💬 Chat Channels
 
 Talk to icron through Telegram, WhatsApp, or Discord.
 
@@ -278,7 +254,7 @@ icron has persistent memory that survives restarts:
 "What do you remember about me?"
 ```
 
-Memory is stored in `~/.icron/memories/` as JSON files.
+Memory is stored in `~/.icron/workspace/memory/` as markdown files.
 
 ## ⏰ Reminders & Scheduling
 
@@ -288,6 +264,13 @@ Memory is stored in `~/.icron/memories/` as JSON files.
 "Remind me in 30 minutes to take a break"
 "Remind me at 2pm to call John"
 "Remind me tomorrow at 9am about the meeting"
+```
+
+**Or use slash commands for quick reminders:**
+
+```
+/remind 30m take a break
+/remind 2h call john
 ```
 
 **Cron jobs for recurring tasks:**
@@ -303,6 +286,28 @@ icron cron add --name "meeting" --message "Meeting starts!" --at "2025-01-31T15:
 icron cron list
 icron cron remove <job_id>
 ```
+
+## ⚡ Slash Commands
+
+Quick commands that bypass the LLM for instant response:
+
+| Command | Description |
+|---------|-------------|
+| `/help` | List all commands |
+| `/help [topic]` | Detailed help (sessions, memory, reminders, search) |
+| `/sessions` | List all sessions |
+| `/session clear` | Clear current session |
+| `/session new` | Start fresh session |
+| `/session rename [name]` | Rename session |
+| `/session switch [id]` | Switch sessions |
+| `/remind [time] [message]` | Set quick reminder |
+| `/search [query]` | Quick web search |
+| `/memory` | Access memory |
+| `/skills` | List available skills |
+| `/skills run [name]` | Run a specific skill |
+| `/weather [location]` | Get weather for a location |
+| `/templates` | List available templates |
+| `/template [name]` | Run a template by name |
 
 ## 🔧 MCP Server Support
 
@@ -431,7 +436,9 @@ Config file: `~/.icron/config.json`
 
 | Command | Description |
 |---------|-------------|
+| `icron setup` | Guided setup wizard (recommended) |
 | `icron onboard` | Initialize config & workspace |
+| `icron validate` | Validate configuration file |
 | `icron agent -m "..."` | Send a message |
 | `icron agent` | Interactive chat mode |
 | `icron gateway` | Start gateway (web UI + channels) |

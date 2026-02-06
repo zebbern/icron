@@ -109,3 +109,43 @@
 - (+) Non-blocking long tasks
 - (+) Controllable execution
 - (-) Limited to 15 iterations per subagent
+
+---
+
+## ADR-007: Slash Commands for Quick Actions
+
+**Decision**: Implement slash commands (`/help`, `/sessions`, etc.) that bypass the LLM for instant response.
+
+**Context**: Some operations (session management, help) don't need LLM processing.
+
+**Rationale**:
+- Instant feedback for common operations
+- Reduce token usage for simple queries
+- Familiar UI pattern (Discord, Slack)
+- Some commands delegate to agent when needed
+
+**Consequences**:
+- (+) Fast response for session/help commands
+- (+) Reduced API costs
+- (+) User-friendly interface
+- (-) Two response pathways to maintain
+
+---
+
+## ADR-008: Skills System
+
+**Decision**: Load skill definitions from SKILL.md files in both workspace and built-in directories.
+
+**Context**: Need extensible capabilities without modifying core code.
+
+**Rationale**:
+- Markdown is human-readable
+- Workspace skills override built-ins
+- Requirements validation (e.g., check for `gh` CLI)
+- Easy to create and share skills
+
+**Consequences**:
+- (+) User-extensible without code changes
+- (+) Clear documentation format
+- (+) Portable skill definitions
+- (-) Skills depend on agent interpreting markdown

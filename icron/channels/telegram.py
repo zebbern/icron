@@ -2,6 +2,7 @@
 
 import asyncio
 import re
+from pathlib import Path
 
 from loguru import logger
 from telegram import Update
@@ -158,33 +159,57 @@ class TelegramChannel(BaseChannel):
             logger.warning("Telegram bot not running")
             return
 
-        # Guard against empty messages (fixes "Message text is empty" error)
-        if not msg.content or not msg.content.strip():
-            logger.debug(f"Skipping empty message to chat_id={msg.chat_id}")
-            return
-
         try:
             # chat_id should be the Telegram chat ID (integer)
             chat_id = int(msg.chat_id)
-            # Convert markdown to Telegram HTML
-            html_content = _markdown_to_telegram_html(msg.content)
-            await self._app.bot.send_message(
-                chat_id=chat_id,
-                text=html_content,
-                parse_mode="HTML"
-            )
         except ValueError:
             logger.error(f"Invalid chat_id: {msg.chat_id}")
-        except Exception as e:
-            # Fallback to plain text if HTML parsing fails
-            logger.warning(f"HTML parse failed, falling back to plain text: {e}")
+            return
+
+        # Send text content if present
+        if msg.content and msg.content.strip():
             try:
+                # Convert markdown to Telegram HTML
+                html_content = _markdown_to_telegram_html(msg.content)
                 await self._app.bot.send_message(
-                    chat_id=int(msg.chat_id),
-                    text=msg.content
+                    chat_id=chat_id,
+                    text=html_content,
+                    parse_mode="HTML"
                 )
-            except Exception as e2:
-                logger.error(f"Error sending Telegram message: {e2}")
+            except Exception as e:
+                # Fallback to plain text if HTML parsing fails
+                logger.warning(f"HTML parse failed, falling back to plain text: {e}")
+                try:
+                    await self._app.bot.send_message(
+                        chat_id=chat_id,
+                        text=msg.content
+                    )
+                except Exception as e2:
+                    logger.error(f"Error sending Telegram message: {e2}")
+
+        # Send media attachments if present
+        if msg.media:
+            image_extensions = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+            for media_path in msg.media:
+                try:
+                    file_path = Path(media_path)
+                    if not file_path.exists():
+                        logger.warning(f"Media file not found: {media_path}")
+                        continue
+
+                    ext = file_path.suffix.lower()
+                    if ext in image_extensions:
+                        # Send as photo for images
+                        with open(file_path, "rb") as photo:
+                            await self._app.bot.send_photo(chat_id=chat_id, photo=photo)
+                        logger.debug(f"Sent photo: {media_path}")
+                    else:
+                        # Send as document for other files
+                        with open(file_path, "rb") as doc:
+                            await self._app.bot.send_document(chat_id=chat_id, document=doc)
+                        logger.debug(f"Sent document: {media_path}")
+                except Exception as e:
+                    logger.error(f"Failed to send media {media_path}: {e}")
     
     async def _on_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle /start command."""

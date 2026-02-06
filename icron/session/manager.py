@@ -21,10 +21,16 @@ class Session:
     """
     
     key: str  # channel:chat_id
+    name: str | None = None  # Human-readable display name
     messages: list[dict[str, Any]] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
     metadata: dict[str, Any] = field(default_factory=dict)
+    
+    @property
+    def display_name(self) -> str:
+        """Get the display name for this session."""
+        return self.name or self.key
     
     def add_message(self, role: str, content: str, **kwargs: Any) -> None:
         """Add a message to the session."""
@@ -203,28 +209,149 @@ class SessionManager:
     
     def list_sessions(self) -> list[dict[str, Any]]:
         """
-        List all sessions.
+        List all sessions with metadata.
         
         Returns:
-            List of session info dicts.
+            List of session info dicts with key, created_at, updated_at, message_count.
         """
         sessions = []
         
         for path in self.sessions_dir.glob("*.jsonl"):
             try:
-                # Read just the metadata line
+                message_count = 0
+                metadata_info = {}
+                
                 with open(path) as f:
-                    first_line = f.readline().strip()
-                    if first_line:
-                        data = json.loads(first_line)
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        data = json.loads(line)
                         if data.get("_type") == "metadata":
-                            sessions.append({
-                                "key": path.stem.replace("_", ":", 1),
-                                "created_at": data.get("created_at"),
-                                "updated_at": data.get("updated_at"),
-                                "path": str(path)
-                            })
+                            metadata_info = data
+                        else:
+                            message_count += 1
+                
+                if metadata_info:
+                    sessions.append({
+                        "key": path.stem.replace("_", ":", 1),
+                        "name": metadata_info.get("metadata", {}).get("name"),
+                        "created_at": metadata_info.get("created_at"),
+                        "updated_at": metadata_info.get("updated_at"),
+                        "message_count": message_count,
+                        "path": str(path)
+                    })
             except Exception:
                 continue
         
         return sorted(sessions, key=lambda x: x.get("updated_at", ""), reverse=True)
+    
+    def rename_session(self, old_key: str, new_key: str) -> bool:
+        """
+        Rename a session by changing its key.
+        
+        Args:
+            old_key: Current session key.
+            new_key: New session key.
+        
+        Returns:
+            True if renamed successfully, False otherwise.
+        """
+        old_path = self._get_session_path(old_key)
+        new_path = self._get_session_path(new_key)
+        
+        if not old_path.exists():
+            logger.warning(f"Session {old_key} not found for rename")
+            return False
+        
+        if new_path.exists():
+            logger.warning(f"Cannot rename: session {new_key} already exists")
+            return False
+        
+        try:
+            # Load the session
+            session = self.get_or_create(old_key)
+            
+            # Update the key
+            session.key = new_key
+            session.updated_at = datetime.now()
+            
+            # Save to new path
+            self.save(session)
+            
+            # Delete old file
+            old_path.unlink()
+            
+            # Update cache
+            self._cache.pop(old_key, None)
+            self._cache[new_key] = session
+            
+            logger.info(f"Renamed session {old_key} to {new_key}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to rename session {old_key} to {new_key}: {e}")
+            return False
+    
+    def delete_session(self, key: str) -> bool:
+        """
+        Delete a session from disk and cache.
+        
+        Args:
+            key: Session key.
+        
+        Returns:
+            True if deleted, False if not found.
+        """
+        return self.delete(key)
+    
+    def get_session_info(self, key: str) -> dict[str, Any] | None:
+        """
+        Get metadata about a session without loading all messages.
+        
+        Args:
+            key: Session key.
+        
+        Returns:
+            Dict with session info or None if not found.
+        """
+        path = self._get_session_path(key)
+        
+        if not path.exists():
+            return None
+        
+        try:
+            message_count = 0
+            metadata_info = {}
+            first_message_at = None
+            last_message_at = None
+            
+            with open(path) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    data = json.loads(line)
+                    if data.get("_type") == "metadata":
+                        metadata_info = data
+                    else:
+                        message_count += 1
+                        timestamp = data.get("timestamp")
+                        if timestamp:
+                            if first_message_at is None:
+                                first_message_at = timestamp
+                            last_message_at = timestamp
+            
+            return {
+                "key": key,
+                "name": metadata_info.get("metadata", {}).get("name"),
+                "created_at": metadata_info.get("created_at"),
+                "updated_at": metadata_info.get("updated_at"),
+                "message_count": message_count,
+                "first_message_at": first_message_at,
+                "last_message_at": last_message_at,
+                "metadata": metadata_info.get("metadata", {}),
+                "path": str(path)
+            }
+        except Exception as e:
+            logger.warning(f"Failed to get session info for {key}: {e}")
+            return None

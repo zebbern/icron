@@ -72,7 +72,31 @@ class MyTool:
 - Environment variables for secrets:
   - `ANTHROPIC_API_KEY`
   - `OPENAI_API_KEY`
+  - `OPENROUTER_API_KEY`
+  - `BRAVE_API_KEY`
   - `ICRON_WORKSPACE`
+
+## Slash Commands
+
+Commands that bypass the LLM for instant response:
+
+- Must start with `/` prefix
+- Defined in `icron/agent/commands.py`
+- Handlers registered in `CommandHandler.handle()`
+- Return `(response, True)` for handled commands
+- Return `(None, False)` to delegate to agent
+
+```python
+async def _handle_mycommand(
+    self,
+    args: str,
+    session_key: str,
+    channel: str,
+    chat_id: str
+) -> tuple[str, bool]:
+    # Process command
+    return "Response text", True
+```
 
 ## Error Handling
 

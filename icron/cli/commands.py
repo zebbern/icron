@@ -148,6 +148,607 @@ This file stores important information that should persist across sessions.
 
 
 # ============================================================================
+# Setup Wizard
+# ============================================================================
+
+# Provider info for setup wizard
+PROVIDER_INFO = {
+    "anthropic": {
+        "name": "Anthropic (Claude)",
+        "models": [
+            "anthropic/claude-opus-4-5",
+            "anthropic/claude-sonnet-4-20250514",
+            "anthropic/claude-3-5-sonnet-20241022",
+            "anthropic/claude-3-5-haiku-20241022",
+        ],
+        "key_url": "https://console.anthropic.com/settings/keys",
+        "key_prefix": "sk-ant-",
+    },
+    "openai": {
+        "name": "OpenAI (GPT)",
+        "models": [
+            "openai/gpt-4o",
+            "openai/gpt-4o-mini",
+            "openai/gpt-4-turbo",
+            "openai/o1-preview",
+        ],
+        "key_url": "https://platform.openai.com/api-keys",
+        "key_prefix": "sk-",
+    },
+    "openrouter": {
+        "name": "OpenRouter (Any Model)",
+        "models": [
+            "anthropic/claude-opus-4-5",
+            "openai/gpt-4o",
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemini-2.0-flash-001",
+        ],
+        "key_url": "https://openrouter.ai/keys",
+        "key_prefix": "sk-or-",
+    },
+    "gemini": {
+        "name": "Google Gemini",
+        "models": [
+            "gemini/gemini-2.0-flash",
+            "gemini/gemini-1.5-pro",
+            "gemini/gemini-1.5-flash",
+        ],
+        "key_url": "https://aistudio.google.com/apikey",
+        "key_prefix": "",
+    },
+    "local": {
+        "name": "Local/vLLM (Self-hosted)",
+        "models": ["custom"],
+        "key_url": None,
+        "key_prefix": "",
+    },
+}
+
+
+def _test_api_connection(provider: str, api_key: str, api_base: str | None = None) -> tuple[bool, str]:
+    """Test API connection with a minimal request. Returns (success, message)."""
+    import httpx
+    
+    if provider == "local":
+        if not api_base:
+            return False, "API base URL required for local provider"
+        try:
+            resp = httpx.get(f"{api_base.rstrip('/')}/models", timeout=10)
+            if resp.status_code == 200:
+                return True, "Connected to local server"
+            return False, f"Server returned {resp.status_code}"
+        except Exception as e:
+            return False, f"Connection failed: {e}"
+    
+    # Test with minimal chat completion
+    endpoints = {
+        "anthropic": ("https://api.anthropic.com/v1/messages", {
+            "model": "claude-3-haiku-20240307",
+            "max_tokens": 1,
+            "messages": [{"role": "user", "content": "hi"}],
+        }, {"x-api-key": api_key, "anthropic-version": "2023-06-01"}),
+        "openai": ("https://api.openai.com/v1/chat/completions", {
+            "model": "gpt-4o-mini",
+            "max_tokens": 1,
+            "messages": [{"role": "user", "content": "hi"}],
+        }, {"Authorization": f"Bearer {api_key}"}),
+        "openrouter": ("https://openrouter.ai/api/v1/chat/completions", {
+            "model": "openai/gpt-4o-mini",
+            "max_tokens": 1,
+            "messages": [{"role": "user", "content": "hi"}],
+        }, {"Authorization": f"Bearer {api_key}"}),
+        "gemini": (f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}", {
+            "contents": [{"parts": [{"text": "hi"}]}],
+            "generationConfig": {"maxOutputTokens": 1},
+        }, {}),
+    }
+    
+    if provider not in endpoints:
+        return False, f"Unknown provider: {provider}"
+    
+    url, body, headers = endpoints[provider]
+    headers["Content-Type"] = "application/json"
+    
+    try:
+        resp = httpx.post(url, json=body, headers=headers, timeout=30)
+        if resp.status_code in (200, 201):
+            return True, "API key verified"
+        elif resp.status_code == 401:
+            return False, "Invalid API key"
+        elif resp.status_code == 403:
+            return False, "API key lacks permissions"
+        elif resp.status_code == 429:
+            # Rate limit still means key is valid
+            return True, "API key verified (rate limited)"
+        else:
+            try:
+                err = resp.json()
+                msg = err.get("error", {}).get("message", resp.text[:100])
+            except Exception:
+                msg = resp.text[:100]
+            return False, f"API error ({resp.status_code}): {msg}"
+    except httpx.TimeoutException:
+        return False, "Connection timed out"
+    except Exception as e:
+        return False, f"Connection error: {e}"
+
+
+@app.command()
+def setup(
+    guided: bool = typer.Option(True, "--guided/--quick", help="Run interactive guided setup"),
+):
+    """Interactive setup wizard for icron configuration."""
+    from rich.prompt import Prompt, Confirm
+    from rich.progress import Progress, SpinnerColumn, TextColumn
+    from rich.panel import Panel
+    from rich.markdown import Markdown
+    
+    from icron.config.loader import get_config_path, save_config, load_config
+    from icron.config.schema import Config
+    from icron.utils.helpers import get_workspace_path
+    
+    config_path = get_config_path()
+    
+    console.print(Panel.fit(
+        f"[bold cyan]{__logo__} icron Setup Wizard[/bold cyan]\n\n"
+        "This wizard will help you configure icron step by step.",
+        border_style="cyan"
+    ))
+    
+    # Check for existing config
+    if config_path.exists():
+        console.print(f"\n[yellow]Existing config found at {config_path}[/yellow]")
+        if not Confirm.ask("Modify existing configuration?", default=True):
+            raise typer.Exit()
+        config = load_config()
+    else:
+        config = Config()
+    
+    console.print()
+    
+    # Step 1: Provider Selection
+    console.print("[bold]Step 1/5: LLM Provider[/bold]")
+    console.print("Which AI provider would you like to use?\n")
+    
+    providers = list(PROVIDER_INFO.keys())
+    for i, prov in enumerate(providers, 1):
+        info = PROVIDER_INFO[prov]
+        console.print(f"  [{i}] {info['name']}")
+    
+    while True:
+        choice = Prompt.ask(
+            "\nEnter number",
+            default="1",
+            show_default=True
+        )
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(providers):
+                selected_provider = providers[idx]
+                break
+        except ValueError:
+            pass
+        console.print("[red]Invalid choice. Enter a number 1-5.[/red]")
+    
+    provider_info = PROVIDER_INFO[selected_provider]
+    console.print(f"\n[green]✓[/green] Selected: {provider_info['name']}\n")
+    
+    # Step 2: API Key
+    console.print("[bold]Step 2/5: API Key[/bold]")
+    
+    if selected_provider == "local":
+        console.print("For local/vLLM, enter your server's base URL.")
+        api_base = Prompt.ask("API Base URL", default="http://localhost:8000/v1")
+        api_key = Prompt.ask("API Key (optional, press Enter to skip)", default="", password=True)
+        config.providers.vllm.api_base = api_base
+        if api_key:
+            config.providers.vllm.api_key = api_key
+    else:
+        key_url = provider_info.get("key_url")
+        if key_url:
+            console.print(f"Get your API key at: [link={key_url}]{key_url}[/link]")
+        
+        # Check existing key
+        existing_key = getattr(config.providers, selected_provider).api_key
+        if existing_key:
+            masked = existing_key[:8] + "..." + existing_key[-4:]
+            console.print(f"[dim]Current key: {masked}[/dim]")
+            if not Confirm.ask("Replace existing key?", default=False):
+                api_key = existing_key
+            else:
+                api_key = Prompt.ask("Enter API key", password=True)
+        else:
+            api_key = Prompt.ask("Enter API key", password=True)
+        
+        if not api_key:
+            console.print("[red]API key is required.[/red]")
+            raise typer.Exit(1)
+        
+        # Set the key
+        setattr(getattr(config.providers, selected_provider), "api_key", api_key)
+        api_base = None
+    
+    # Test connection
+    console.print()
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        progress.add_task("Testing API connection...", total=None)
+        success, message = _test_api_connection(selected_provider, api_key, api_base)
+    
+    if success:
+        console.print(f"[green]✓[/green] {message}\n")
+    else:
+        console.print(f"[red]✗[/red] {message}")
+        if not Confirm.ask("Continue anyway?", default=False):
+            raise typer.Exit(1)
+        console.print()
+    
+    # Step 3: Model Selection
+    console.print("[bold]Step 3/5: Model Selection[/bold]")
+    
+    models = provider_info["models"]
+    if selected_provider == "local":
+        model = Prompt.ask("Enter model name", default="")
+        if not model:
+            console.print("[yellow]No model specified. You can set this later.[/yellow]")
+    else:
+        console.print("Recommended models:\n")
+        for i, model_name in enumerate(models, 1):
+            console.print(f"  [{i}] {model_name}")
+        console.print(f"  [c] Custom (enter your own)")
+        
+        while True:
+            choice = Prompt.ask("\nEnter number or 'c' for custom", default="1")
+            if choice.lower() == "c":
+                model = Prompt.ask("Enter model name")
+                break
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(models):
+                    model = models[idx]
+                    break
+            except ValueError:
+                pass
+            console.print("[red]Invalid choice.[/red]")
+    
+    if model:
+        config.agents.defaults.model = model
+        console.print(f"\n[green]✓[/green] Model: {model}\n")
+    
+    # Step 4: Workspace
+    console.print("[bold]Step 4/5: Workspace Location[/bold]")
+    console.print("Where should icron store its workspace files?\n")
+    
+    default_workspace = "~/.icron/workspace"
+    workspace_input = Prompt.ask("Workspace path", default=default_workspace)
+    workspace_path = Path(workspace_input).expanduser()
+    
+    # Validate/create workspace
+    try:
+        workspace_path.mkdir(parents=True, exist_ok=True)
+        test_file = workspace_path / ".icron_test"
+        test_file.write_text("test")
+        test_file.unlink()
+        console.print(f"[green]✓[/green] Workspace: {workspace_path}\n")
+        config.agents.defaults.workspace = workspace_input
+    except Exception as e:
+        console.print(f"[red]✗[/red] Cannot write to workspace: {e}")
+        if not Confirm.ask("Continue with default workspace?", default=True):
+            raise typer.Exit(1)
+        config.agents.defaults.workspace = default_workspace
+        workspace_path = Path(default_workspace).expanduser()
+        workspace_path.mkdir(parents=True, exist_ok=True)
+        console.print()
+    
+    # Step 5: Optional Channels
+    console.print("[bold]Step 5/5: Chat Channels (Optional)[/bold]")
+    console.print("Configure chat channels to interact with icron.\n")
+    
+    # Telegram
+    if Confirm.ask("Set up Telegram?", default=False):
+        console.print("\nGet a bot token from @BotFather on Telegram")
+        tg_token = Prompt.ask("Bot token", password=True)
+        if tg_token:
+            config.channels.telegram.enabled = True
+            config.channels.telegram.token = tg_token
+            tg_users = Prompt.ask("Allowed user IDs/usernames (comma-separated, or empty for all)", default="")
+            if tg_users:
+                config.channels.telegram.allow_from = [u.strip() for u in tg_users.split(",") if u.strip()]
+            console.print("[green]✓[/green] Telegram configured\n")
+    
+    # Discord
+    if Confirm.ask("Set up Discord?", default=False):
+        console.print("\nCreate a bot at https://discord.com/developers/applications")
+        dc_token = Prompt.ask("Bot token", password=True)
+        if dc_token:
+            config.channels.discord.enabled = True
+            config.channels.discord.token = dc_token
+            dc_users = Prompt.ask("Allowed user IDs (comma-separated, or empty for all)", default="")
+            if dc_users:
+                try:
+                    config.channels.discord.allow_from = [int(u.strip()) for u in dc_users.split(",") if u.strip()]
+                except ValueError:
+                    console.print("[yellow]Invalid user IDs, skipping allow list[/yellow]")
+            console.print("[green]✓[/green] Discord configured\n")
+    
+    # Save configuration
+    console.print("[bold]Saving configuration...[/bold]")
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        progress.add_task("Writing config...", total=None)
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        save_config(config)
+    
+    console.print(f"[green]✓[/green] Config saved to {config_path}\n")
+    
+    # Create workspace templates
+    _create_workspace_templates(workspace_path)
+    
+    # Summary
+    console.print(Panel.fit(
+        f"[bold green]Setup Complete![/bold green]\n\n"
+        f"Provider: {provider_info['name']}\n"
+        f"Model: {config.agents.defaults.model}\n"
+        f"Workspace: {workspace_path}\n"
+        f"Config: {config_path}\n\n"
+        "[bold]Next steps:[/bold]\n"
+        "  • Chat: [cyan]icron agent -m \"Hello!\"[/cyan]\n"
+        "  • Start gateway: [cyan]icron gateway[/cyan]\n"
+        "  • Validate config: [cyan]icron validate[/cyan]",
+        border_style="green"
+    ))
+
+
+@app.command()
+def validate():
+    """Validate icron configuration and environment."""
+    from rich.panel import Panel
+    from rich.progress import Progress, SpinnerColumn, TextColumn
+    
+    from icron.config.loader import get_config_path, load_config
+    
+    console.print(Panel.fit(
+        f"[bold cyan]{__logo__} icron Configuration Validator[/bold cyan]",
+        border_style="cyan"
+    ))
+    console.print()
+    
+    checks_passed = 0
+    checks_failed = 0
+    warnings = 0
+    
+    def pass_check(msg: str):
+        nonlocal checks_passed
+        checks_passed += 1
+        console.print(f"[green]✓[/green] {msg}")
+    
+    def fail_check(msg: str, suggestion: str = ""):
+        nonlocal checks_failed
+        checks_failed += 1
+        console.print(f"[red]✗[/red] {msg}")
+        if suggestion:
+            console.print(f"  [dim]→ {suggestion}[/dim]")
+    
+    def warn_check(msg: str):
+        nonlocal warnings
+        warnings += 1
+        console.print(f"[yellow]![/yellow] {msg}")
+    
+    # Check 1: Config file exists
+    console.print("[bold]Configuration File[/bold]")
+    config_path = get_config_path()
+    
+    if config_path.exists():
+        pass_check(f"Config exists: {config_path}")
+    else:
+        fail_check(
+            f"Config not found: {config_path}",
+            "Run 'icron setup' to create configuration"
+        )
+        console.print(f"\n[red]Cannot continue without config file.[/red]")
+        raise typer.Exit(1)
+    
+    # Check 2: Valid JSON
+    import json
+    try:
+        with open(config_path) as f:
+            raw_data = json.load(f)
+        pass_check("Valid JSON format")
+    except json.JSONDecodeError as e:
+        fail_check(
+            f"Invalid JSON: {e}",
+            "Fix JSON syntax errors in config file"
+        )
+        raise typer.Exit(1)
+    
+    # Check 3: Schema validation
+    try:
+        config = load_config()
+        pass_check("Schema validation passed")
+    except Exception as e:
+        fail_check(
+            f"Schema validation failed: {e}",
+            "Check config structure matches expected format"
+        )
+        raise typer.Exit(1)
+    
+    # Check 4: Provider configuration
+    console.print("\n[bold]API Providers[/bold]")
+    
+    has_provider = False
+    providers_to_test = []
+    
+    if config.providers.anthropic.api_key:
+        pass_check("Anthropic API key configured")
+        providers_to_test.append(("anthropic", config.providers.anthropic.api_key, None))
+        has_provider = True
+    
+    if config.providers.openai.api_key:
+        pass_check("OpenAI API key configured")
+        providers_to_test.append(("openai", config.providers.openai.api_key, None))
+        has_provider = True
+    
+    if config.providers.openrouter.api_key:
+        pass_check("OpenRouter API key configured")
+        providers_to_test.append(("openrouter", config.providers.openrouter.api_key, None))
+        has_provider = True
+    
+    if config.providers.gemini.api_key:
+        pass_check("Gemini API key configured")
+        providers_to_test.append(("gemini", config.providers.gemini.api_key, None))
+        has_provider = True
+    
+    if config.providers.vllm.api_base:
+        pass_check(f"vLLM/Local configured: {config.providers.vllm.api_base}")
+        providers_to_test.append(("local", config.providers.vllm.api_key, config.providers.vllm.api_base))
+        has_provider = True
+    
+    if not has_provider:
+        fail_check(
+            "No LLM provider configured",
+            "Run 'icron setup' to configure a provider"
+        )
+    
+    # Test API connections
+    if providers_to_test:
+        console.print("\n[bold]API Connection Tests[/bold]")
+        for provider, api_key, api_base in providers_to_test:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console,
+                transient=True,
+            ) as progress:
+                progress.add_task(f"Testing {provider}...", total=None)
+                success, message = _test_api_connection(provider, api_key, api_base)
+            
+            if success:
+                pass_check(f"{provider}: {message}")
+            else:
+                fail_check(f"{provider}: {message}")
+    
+    # Check 5: Workspace
+    console.print("\n[bold]Workspace[/bold]")
+    workspace = config.workspace_path
+    
+    if workspace.exists():
+        pass_check(f"Workspace exists: {workspace}")
+        
+        # Check write permissions
+        try:
+            test_file = workspace / ".icron_validate_test"
+            test_file.write_text("test")
+            test_file.unlink()
+            pass_check("Workspace is writable")
+        except Exception as e:
+            fail_check(
+                f"Workspace not writable: {e}",
+                "Check file permissions on workspace directory"
+            )
+        
+        # Check for key files
+        for filename in ["AGENTS.md", "SOUL.md"]:
+            if (workspace / filename).exists():
+                pass_check(f"Found {filename}")
+            else:
+                warn_check(f"Missing {filename} (optional)")
+    else:
+        fail_check(
+            f"Workspace not found: {workspace}",
+            "Run 'icron setup' or 'icron onboard' to create workspace"
+        )
+    
+    # Check 6: Channels
+    console.print("\n[bold]Chat Channels[/bold]")
+    
+    channels_configured = False
+    
+    if config.channels.telegram.enabled:
+        if config.channels.telegram.token:
+            pass_check("Telegram enabled and configured")
+            channels_configured = True
+        else:
+            fail_check(
+                "Telegram enabled but no token set",
+                "Add bot token from @BotFather"
+            )
+    
+    if config.channels.discord.enabled:
+        if config.channels.discord.token:
+            pass_check("Discord enabled and configured")
+            channels_configured = True
+        else:
+            fail_check(
+                "Discord enabled but no token set",
+                "Add bot token from Discord Developer Portal"
+            )
+    
+    if config.channels.slack.enabled:
+        if config.channels.slack.bot_token and config.channels.slack.app_token:
+            pass_check("Slack enabled and configured")
+            channels_configured = True
+        else:
+            fail_check(
+                "Slack enabled but tokens missing",
+                "Add bot_token (xoxb-) and app_token (xapp-)"
+            )
+    
+    if config.channels.whatsapp.enabled:
+        pass_check("WhatsApp enabled")
+        channels_configured = True
+    
+    if not channels_configured:
+        warn_check("No chat channels configured (optional)")
+    
+    # Check 7: MCP
+    console.print("\n[bold]MCP (Model Context Protocol)[/bold]")
+    
+    if config.tools.mcp.enabled:
+        mcp_count = len(config.tools.mcp.servers)
+        if mcp_count > 0:
+            pass_check(f"MCP enabled with {mcp_count} server(s)")
+            for name, server in config.tools.mcp.servers.items():
+                if server.transport == "sse":
+                    console.print(f"  [dim]• {name}: SSE ({server.url})[/dim]")
+                else:
+                    console.print(f"  [dim]• {name}: stdio ({server.command})[/dim]")
+        else:
+            warn_check("MCP enabled but no servers configured")
+    else:
+        console.print("[dim]MCP disabled[/dim]")
+    
+    # Summary
+    console.print()
+    total = checks_passed + checks_failed
+    if checks_failed == 0:
+        status_color = "green"
+        status_text = "All checks passed!"
+    else:
+        status_color = "red"
+        status_text = f"{checks_failed} check(s) failed"
+    
+    console.print(Panel.fit(
+        f"[bold {status_color}]{status_text}[/bold {status_color}]\n\n"
+        f"[green]Passed:[/green] {checks_passed}\n"
+        f"[red]Failed:[/red] {checks_failed}\n"
+        f"[yellow]Warnings:[/yellow] {warnings}",
+        border_style=status_color
+    ))
+    
+    if checks_failed > 0:
+        raise typer.Exit(1)
+
+
+# ============================================================================
 # Gateway / Server
 # ============================================================================
 

@@ -24,11 +24,13 @@ from icron.agent.tools.filesystem import (
 from icron.agent.tools.search import GlobTool, GrepTool
 from icron.agent.tools.shell import ExecTool
 from icron.agent.tools.web import WebSearchTool, WebFetchTool
+from icron.agent.tools.screenshot import ScreenshotTool
 from icron.agent.tools.message import MessageTool
 from icron.agent.tools.spawn import SpawnTool
 from icron.agent.tools.memory_tools import RememberTool, RecallTool, NoteTodayTool
 from icron.agent.tools.reminder_tools import ReminderTool, ListRemindersool, CancelReminderTool
 from icron.agent.subagent import SubagentManager
+from icron.agent.commands import CommandHandler
 from icron.session.manager import SessionManager
 
 
@@ -69,6 +71,7 @@ class AgentLoop:
         
         self.context = ContextBuilder(workspace)
         self.sessions = SessionManager(workspace)
+        self.commands = CommandHandler(session_manager=self.sessions)
         self.tools = ToolRegistry()
         self.subagents = SubagentManager(
             provider=provider,
@@ -136,6 +139,11 @@ class AgentLoop:
         # Web tools
         self.tools.register(WebSearchTool(api_key=self.brave_api_key))
         self.tools.register(WebFetchTool())
+
+        # Screenshot tool
+        self.tools.register(ScreenshotTool(
+            workspace_path=str(self.workspace),
+        ))
 
         # Search tools
         self.tools.register(GlobTool(
@@ -262,7 +270,33 @@ class AgentLoop:
             return await self._process_system_message(msg)
         
         logger.info(f"Processing message from {msg.channel}:{msg.sender_id}")
-        
+
+        # Handle slash commands
+        if self.commands.is_command(msg.content):
+            response, handled = await self.commands.handle(
+                text=msg.content,
+                session_key=msg.session_key,
+                channel=msg.channel,
+                chat_id=msg.chat_id
+            )
+            if handled:
+                if response:
+                    return OutboundMessage(
+                        channel=msg.channel,
+                        chat_id=msg.chat_id,
+                        content=response
+                    )
+                return None
+            # If not handled, continue with modified content (for delegation)
+            if response:
+                msg = InboundMessage(
+                    channel=msg.channel,
+                    chat_id=msg.chat_id,
+                    sender_id=msg.sender_id,
+                    content=response,
+                    media=msg.media
+                )
+
         # Get or create session
         session = self.sessions.get_or_create(msg.session_key)
         

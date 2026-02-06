@@ -66,9 +66,46 @@ web_fetch(url: str, extractMode: str = "markdown", maxChars: int = 50000) -> str
 ## Communication
 
 ### message
-Send a message to the user (used internally).
+Send a message to the user.
 ```
-message(content: str, channel: str = None, chat_id: str = None) -> str
+message(content: str, media: list[str] = None, channel: str = None, chat_id: str = None) -> str
+```
+
+**Parameters:**
+- `content`: The message text to send
+- `media`: Optional list of file paths to attach (images, screenshots, etc.)
+- `channel`: Optional target channel override
+- `chat_id`: Optional target chat ID override
+
+**Example with attachment:**
+```python
+message(content="Here's the screenshot", media=["/path/to/screenshot.png"])
+```
+
+## Screenshots
+
+### screenshot
+Capture a screenshot of a web page.
+```
+screenshot(url: str, full_page: bool = False, width: int = 1280, height: int = 720) -> str
+```
+
+**Parameters:**
+- `url`: URL to capture (must be http/https)
+- `full_page`: Capture full scrollable page (default: False)
+- `width`: Viewport width in pixels (default: 1280)
+- `height`: Viewport height in pixels (default: 720)
+
+**IMPORTANT:** After taking a screenshot, you must use the `message` tool with the `media` parameter to send it to the user.
+
+**Example workflow:**
+```python
+# Step 1: Take screenshot
+result = screenshot(url="https://github.com/user")
+# Returns: "Screenshot captured... Path: /workspace/media/screenshots/screenshot_xxx.png..."
+
+# Step 2: Send to user with media parameter
+message(content="Here's the screenshot!", media=["/workspace/media/screenshots/screenshot_xxx.png"])
 ```
 
 ## Background Tasks
@@ -139,6 +176,114 @@ write_file(
     content="# Heartbeat Tasks\n\n- [ ] Task 1\n- [ ] Task 2\n"
 )
 ```
+
+---
+
+## Slash Commands
+
+Slash commands provide quick access to common operations without invoking the LLM.
+
+### Help Commands
+```
+/help              # List all available commands
+/help sessions     # Detailed help about sessions
+/help memory       # Detailed help about memory
+/help reminders    # Detailed help about reminders
+/help search       # Detailed help about web search
+/help commands     # List all slash commands
+```
+
+### Session Management
+```
+/sessions              # List all sessions
+/session clear         # Clear current session history
+/session new           # Start a fresh session
+/session rename [name] # Rename the current session
+/session switch [id]   # Switch to a different session
+```
+
+### Quick Actions
+```
+/remind [time] [message]  # Set a reminder
+                          # Examples: /remind 30m check email
+                          #           /remind 2h call john
+/search [query]           # Quick web search
+/memory                   # Access memory operations
+```
+
+**Note:** Slash commands bypass the LLM and are processed directly by icron for faster response times.
+
+---
+
+## Skills
+
+Skills are reusable task modules that extend icron's capabilities:
+
+### List available skills
+```
+/skills
+```
+
+### Run a skill
+```
+/skills run [name]
+```
+
+Skills are located in `icron/skills/` and include:
+- `weather` - Weather lookups
+- `summarize` - Content summarization
+- `github` - GitHub operations
+- `cron` - Scheduled task management
+
+---
+
+## Templates
+
+Templates provide pre-built prompts for common development tasks:
+
+### List templates
+```
+/templates
+```
+
+### Run a template
+```
+/template [name]
+```
+
+**Available templates:**
+| Template | Description |
+|----------|-------------|
+| `morning` | 🌅 Morning briefing - weather, calendar, reminders, news |
+| `daily` | 📊 Daily summary - accomplishments and pending tasks |
+| `research` | 🔬 Research a topic and summarize findings |
+| `recap` | 📝 Summarize the current conversation session |
+
+**Example:**
+```
+/template morning
+/template research AI trends
+```
+Templates provide structured workflows for common tasks.
+
+---
+
+## Weather
+
+Quick weather lookup via slash command:
+
+```
+/weather [location]
+```
+
+**Examples:**
+```
+/weather London
+/weather New York, NY
+/weather Tokyo
+```
+
+Returns current conditions, temperature, humidity, and forecast.
 
 ---
 
