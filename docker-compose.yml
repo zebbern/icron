@@ -19,7 +19,7 @@ services:
       - ICRON_WORKSPACE=/app/workspace
     ports:
       # Gateway port (optional, for HTTP API)
-      - "18790:18790"
+      - "3883:3883"
     # For WhatsApp bridge headless browser support
     # Uncomment if using WhatsApp channel
     # shm_size: '2gb'

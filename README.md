@@ -247,7 +247,7 @@ The gateway provides a web interface for configuration.
 
 ```bash
 icron gateway
-# Open http://localhost:18790/app
+# Open http://localhost:3883/app
 ```
 
 **Quick Settings UI:**
@@ -480,7 +480,7 @@ docker run -v ~/.icron:/root/.icron --rm icron onboard
 vim ~/.icron/config.json
 
 # Run gateway
-docker run -v ~/.icron:/root/.icron -p 18790:18790 icron gateway
+docker run -v ~/.icron:/root/.icron -p 3883:3883 icron gateway
 ```
 
 **Railway deployment:**

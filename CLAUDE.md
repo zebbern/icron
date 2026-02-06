@@ -47,7 +47,7 @@ bridge/             # Node.js WhatsApp bridge
 
 ```bash
 icron onboard            # Initialize config + workspace
-icron gateway            # Start full server (web UI at :18790)
+icron gateway            # Start full server (web UI at :3883)
 icron agent -m "..."     # Direct chat + REPL mode
 icron cron list          # Manage scheduled jobs
 icron status             # Show configuration

@@ -45,7 +45,7 @@ WORKDIR /app
 RUN mkdir -p /root/.icron
 
 # Gateway default port
-EXPOSE 18790
+EXPOSE 3883
 
 ENTRYPOINT ["icron"]
 CMD ["status"]

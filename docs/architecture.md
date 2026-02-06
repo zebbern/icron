@@ -9,7 +9,7 @@ Icron is a Python-based AI agent framework with a modular architecture designed 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Web Gateway (Flask)                     │
-│                    localhost:18790                           │
+│                    localhost:3883                           │
 ├─────────────────────────────────────────────────────────────┤
 │  /         - Basic settings UI                               │
 │  /app      - Full Svelte UI                                  │
