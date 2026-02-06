@@ -6,6 +6,15 @@
 **icron** is a **lightweight** personal AI assistant designed for simplicity and extensibility.
 Built with Python, it supports multiple chat channels (Discord, Telegram, WhatsApp) and can connect to any OpenAI-compatible LLM provider (Anthropic, OpenRouter, Together, Groq, vLLM). With a modular architecture and built-in tools for file operations, web search, shell execution, memory, and scheduling, icron is your personal assistant for research, coding, reminders, and more.
 
+## Contents
+
+| | | |
+|:---:|:---:|:---:|
+| [Install](#-install) | [Quick Start](#-quick-start) | [Features](#-key-features) |
+| [Channels](#-chat-channels) | [Memory](#-memory--persistence) | [Reminders](#-reminders--scheduling) |
+| [Commands](#-slash-commands) | [MCP](#-mcp-server-support) | [Security](#-security) |
+| [Config](#️-configuration-reference) | [CLI](#️-cli-reference) | [Docker](#-docker) |
+
 ### Core Capabilities
 
 | Category | Tools |
