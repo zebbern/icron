@@ -325,6 +325,14 @@ class ListDirTool(Tool):
 class RenameFileTool(Tool):
     """Tool to rename a file or directory."""
 
+    def __init__(
+        self,
+        workspace: Optional[Path] = None,
+        restrict_to_workspace: bool = True,
+    ):
+        self.workspace = workspace
+        self.restrict_to_workspace = restrict_to_workspace
+
     @property
     def name(self) -> str:
         return "rename_file"
@@ -352,7 +360,12 @@ class RenameFileTool(Tool):
 
     async def execute(self, old_path: str, new_name: str, **kwargs: Any) -> str:
         try:
-            old_file = Path(old_path).expanduser()
+            # Validate path against workspace boundaries
+            old_file = validate_workspace_path(
+                old_path,
+                self.workspace,
+                self.restrict_to_workspace,
+            )
             if not old_file.exists():
                 return f"Error: File or directory not found: {old_path}"
 
@@ -361,11 +374,24 @@ class RenameFileTool(Tool):
                 return "Error: new_name should be just a name, not a path"
 
             new_file = old_file.parent / new_name
+            
+            # Validate destination is also within workspace
+            try:
+                validate_workspace_path(
+                    str(new_file),
+                    self.workspace,
+                    self.restrict_to_workspace,
+                )
+            except WorkspaceSecurityError:
+                return "Error: Destination would be outside workspace"
+            
             if new_file.exists():
                 return f"Error: Target already exists: {new_file}"
 
             old_file.rename(new_file)
             return f"Successfully renamed {old_path} to {new_name}"
+        except WorkspaceSecurityError as e:
+            return f"Error: {e}"
         except PermissionError:
             return f"Error: Permission denied"
         except Exception as e:
@@ -374,6 +400,14 @@ class RenameFileTool(Tool):
 
 class MoveFileTool(Tool):
     """Tool to move a file or directory to a new location."""
+
+    def __init__(
+        self,
+        workspace: Optional[Path] = None,
+        restrict_to_workspace: bool = True,
+    ):
+        self.workspace = workspace
+        self.restrict_to_workspace = restrict_to_workspace
 
     @property
     def name(self) -> str:
@@ -402,15 +436,31 @@ class MoveFileTool(Tool):
 
     async def execute(self, source: str, destination: str, **kwargs: Any) -> str:
         try:
-            src_path = Path(source).expanduser()
+            # Validate source path against workspace boundaries
+            src_path = validate_workspace_path(
+                source,
+                self.workspace,
+                self.restrict_to_workspace,
+            )
             if not src_path.exists():
                 return f"Error: Source not found: {source}"
 
-            dest_path = Path(destination).expanduser()
+            # Validate destination path against workspace boundaries
+            dest_path = validate_workspace_path(
+                destination,
+                self.workspace,
+                self.restrict_to_workspace,
+            )
 
             # If destination is a directory, move source into it
             if dest_path.is_dir():
                 dest_path = dest_path / src_path.name
+                # Re-validate the new destination
+                validate_workspace_path(
+                    str(dest_path),
+                    self.workspace,
+                    self.restrict_to_workspace,
+                )
 
             # Create parent directories if needed
             dest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -420,6 +470,8 @@ class MoveFileTool(Tool):
 
             shutil.move(str(src_path), str(dest_path))
             return f"Successfully moved {source} to {destination}"
+        except WorkspaceSecurityError as e:
+            return f"Error: {e}"
         except PermissionError:
             return f"Error: Permission denied"
         except Exception as e:
@@ -428,6 +480,14 @@ class MoveFileTool(Tool):
 
 class CopyFileTool(Tool):
     """Tool to copy a file or directory."""
+
+    def __init__(
+        self,
+        workspace: Optional[Path] = None,
+        restrict_to_workspace: bool = True,
+    ):
+        self.workspace = workspace
+        self.restrict_to_workspace = restrict_to_workspace
 
     @property
     def name(self) -> str:
@@ -456,15 +516,31 @@ class CopyFileTool(Tool):
 
     async def execute(self, source: str, destination: str, **kwargs: Any) -> str:
         try:
-            src_path = Path(source).expanduser()
+            # Validate source path against workspace boundaries
+            src_path = validate_workspace_path(
+                source,
+                self.workspace,
+                self.restrict_to_workspace,
+            )
             if not src_path.exists():
                 return f"Error: Source not found: {source}"
 
-            dest_path = Path(destination).expanduser()
+            # Validate destination path against workspace boundaries
+            dest_path = validate_workspace_path(
+                destination,
+                self.workspace,
+                self.restrict_to_workspace,
+            )
 
             # If destination is a directory, copy source into it
             if dest_path.is_dir():
                 dest_path = dest_path / src_path.name
+                # Re-validate the new destination
+                validate_workspace_path(
+                    str(dest_path),
+                    self.workspace,
+                    self.restrict_to_workspace,
+                )
 
             # Create parent directories if needed
             dest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -478,6 +554,8 @@ class CopyFileTool(Tool):
                 shutil.copy2(str(src_path), str(dest_path))
 
             return f"Successfully copied {source} to {destination}"
+        except WorkspaceSecurityError as e:
+            return f"Error: {e}"
         except PermissionError:
             return f"Error: Permission denied"
         except Exception as e:
@@ -486,6 +564,14 @@ class CopyFileTool(Tool):
 
 class CreateDirTool(Tool):
     """Tool to create a new directory."""
+
+    def __init__(
+        self,
+        workspace: Optional[Path] = None,
+        restrict_to_workspace: bool = True,
+    ):
+        self.workspace = workspace
+        self.restrict_to_workspace = restrict_to_workspace
 
     @property
     def name(self) -> str:
@@ -510,7 +596,12 @@ class CreateDirTool(Tool):
 
     async def execute(self, path: str, **kwargs: Any) -> str:
         try:
-            dir_path = Path(path).expanduser()
+            # Validate path against workspace boundaries
+            dir_path = validate_workspace_path(
+                path,
+                self.workspace,
+                self.restrict_to_workspace,
+            )
             if dir_path.exists():
                 if dir_path.is_dir():
                     return f"Directory already exists: {path}"
@@ -519,6 +610,8 @@ class CreateDirTool(Tool):
 
             dir_path.mkdir(parents=True, exist_ok=True)
             return f"Successfully created directory: {path}"
+        except WorkspaceSecurityError as e:
+            return f"Error: {e}"
         except PermissionError:
             return f"Error: Permission denied: {path}"
         except Exception as e:

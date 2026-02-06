@@ -103,11 +103,23 @@ class AgentLoop:
             workspace=self.workspace,
             restrict_to_workspace=True,
         ))
-        # Additional file tools (from PR #59) - no workspace restriction yet
-        self.tools.register(RenameFileTool())
-        self.tools.register(MoveFileTool())
-        self.tools.register(CopyFileTool())
-        self.tools.register(CreateDirTool())
+        # Additional file tools with workspace security
+        self.tools.register(RenameFileTool(
+            workspace=self.workspace,
+            restrict_to_workspace=True,
+        ))
+        self.tools.register(MoveFileTool(
+            workspace=self.workspace,
+            restrict_to_workspace=True,
+        ))
+        self.tools.register(CopyFileTool(
+            workspace=self.workspace,
+            restrict_to_workspace=True,
+        ))
+        self.tools.register(CreateDirTool(
+            workspace=self.workspace,
+            restrict_to_workspace=True,
+        ))
         
         # Shell tool
         import os
