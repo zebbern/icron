@@ -843,36 +843,41 @@ def gateway(
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>icron Settings</title>
     <style>
-      :root {{ color-scheme: light; }}
-      body {{ margin: 0; font-family: Arial, sans-serif; background: #f6f7fb; color: #111; }}
-      header {{ background: #0f172a; color: #fff; padding: 24px; }}
+      :root {{ color-scheme: dark; }}
+      body {{ margin: 0; font-family: Arial, sans-serif; background: #0a0a0a; color: #ffffff; }}
+      header {{ background: linear-gradient(135deg, rgba(34, 211, 208, 0.12), rgba(248, 113, 113, 0.08)); border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 24px; }}
       header h1 {{ margin: 0 0 8px 0; font-size: 22px; }}
-      header p {{ margin: 0; opacity: 0.9; }}
+      header p {{ margin: 0; opacity: 0.8; }}
       main {{ max-width: 900px; margin: 0 auto; padding: 24px; }}
-      .card {{ background: #fff; border: 1px solid #e6e8ef; border-radius: 12px; padding: 20px; margin-bottom: 16px; }}
+      .card {{ background: #1a1a1a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 16px; }}
+      .card h3 {{ color: #ffffff; margin-top: 0; }}
       .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }}
-      label {{ display: block; font-weight: 600; margin-bottom: 6px; }}
+      label {{ display: block; font-weight: 600; margin-bottom: 6px; color: #ffffff; }}
       input[type="text"], input[type="password"] {{
-        width: 100%; padding: 10px 12px; border: 1px solid #d4d7e0; border-radius: 8px;
+        width: 100%; padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;
+        background: #2a2a2a; color: #ffffff;
       }}
+      input[type="text"]::placeholder, input[type="password"]::placeholder {{ color: #9ca3af; }}
       textarea {{
-        width: 100%; min-height: 320px; padding: 10px 12px; border: 1px solid #d4d7e0;
+        width: 100%; min-height: 320px; padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
         "Liberation Mono", "Courier New", monospace; font-size: 12px;
+        background: #141414; color: #ffffff;
       }}
-      .hint {{ font-size: 12px; color: #555; margin-top: 6px; }}
+      .hint {{ font-size: 12px; color: #9ca3af; margin-top: 6px; }}
       .notice {{ padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }}
-      .notice.ok {{ background: #ecfdf3; border: 1px solid #b7f3cf; color: #065f46; }}
-      .notice.err {{ background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }}
-      .notice.warn {{ background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }}
+      .notice.ok {{ background: rgba(34, 211, 208, 0.15); border: 1px solid rgba(34, 211, 208, 0.3); color: #22d3d0; }}
+      .notice.err {{ background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); color: #fca5a5; }}
+      .notice.warn {{ background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: #fbbf24; }}
       .row {{ display: flex; gap: 12px; align-items: center; }}
-      .row input[type="checkbox"] {{ width: 18px; height: 18px; }}
+      .row input[type="checkbox"] {{ width: 18px; height: 18px; accent-color: #22d3d0; }}
       button {{
-        background: #0f172a; color: #fff; border: 0; padding: 12px 18px;
+        background: linear-gradient(135deg, #22d3d0, #14b8a6); color: #0a0a0a; border: 0; padding: 12px 18px;
         border-radius: 8px; font-weight: 600; cursor: pointer;
       }}
-      footer {{ font-size: 12px; color: #666; margin-top: 10px; }}
-      code {{ background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }}
+      button:hover {{ opacity: 0.9; }}
+      footer {{ font-size: 12px; color: #9ca3af; margin-top: 10px; }}
+      code {{ background: #2a2a2a; padding: 2px 6px; border-radius: 6px; color: #22d3d0; }}
     </style>
   </head>
   <body>
