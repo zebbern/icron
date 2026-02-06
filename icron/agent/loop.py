@@ -86,39 +86,42 @@ class AgentLoop:
     
     def _register_default_tools(self) -> None:
         """Register the default set of tools."""
+        # Use config setting for workspace restriction (default: False = no restriction)
+        restrict = self.exec_config.restrict_to_workspace
+        
         # File tools (with workspace security validation)
         self.tools.register(ReadFileTool(
             workspace=self.workspace,
-            restrict_to_workspace=True,
+            restrict_to_workspace=restrict,
         ))
         self.tools.register(WriteFileTool(
             workspace=self.workspace,
-            restrict_to_workspace=True,
+            restrict_to_workspace=restrict,
         ))
         self.tools.register(EditFileTool(
             workspace=self.workspace,
-            restrict_to_workspace=True,
+            restrict_to_workspace=restrict,
         ))
         self.tools.register(ListDirTool(
             workspace=self.workspace,
-            restrict_to_workspace=True,
+            restrict_to_workspace=restrict,
         ))
         # Additional file tools with workspace security
         self.tools.register(RenameFileTool(
             workspace=self.workspace,
-            restrict_to_workspace=True,
+            restrict_to_workspace=restrict,
         ))
         self.tools.register(MoveFileTool(
             workspace=self.workspace,
-            restrict_to_workspace=True,
+            restrict_to_workspace=restrict,
         ))
         self.tools.register(CopyFileTool(
             workspace=self.workspace,
-            restrict_to_workspace=True,
+            restrict_to_workspace=restrict,
         ))
         self.tools.register(CreateDirTool(
             workspace=self.workspace,
-            restrict_to_workspace=True,
+            restrict_to_workspace=restrict,
         ))
         
         # Shell tool
@@ -127,7 +130,7 @@ class AgentLoop:
         self.tools.register(ExecTool(
             working_dir=shell_cwd or str(self.workspace),
             timeout=self.exec_config.timeout,
-            restrict_to_workspace=self.exec_config.restrict_to_workspace,
+            restrict_to_workspace=restrict,
         ))
         
         # Web tools
@@ -137,11 +140,11 @@ class AgentLoop:
         # Search tools
         self.tools.register(GlobTool(
             workspace=self.workspace,
-            restrict_to_workspace=self.exec_config.restrict_to_workspace,
+            restrict_to_workspace=restrict,
         ))
         self.tools.register(GrepTool(
             workspace=self.workspace,
-            restrict_to_workspace=self.exec_config.restrict_to_workspace,
+            restrict_to_workspace=restrict,
         ))
         
         # Message tool

@@ -17,6 +17,7 @@
     openrouterApiKey: '',
     openrouterApiBase: '',
     websearchApiKey: '',
+    restrictToWorkspace: false,
     telegramEnabled: false,
     telegramToken: '',
     telegramAllowFrom: '',
@@ -56,6 +57,7 @@
       openrouterApiKey: safeGet(cfg, ['providers', 'openrouter', 'apiKey'], ''),
       openrouterApiBase: safeGet(cfg, ['providers', 'openrouter', 'apiBase'], ''),
       websearchApiKey: safeGet(cfg, ['tools', 'web', 'search', 'apiKey'], ''),
+      restrictToWorkspace: !!safeGet(cfg, ['tools', 'exec', 'restrictToWorkspace'], false),
       telegramEnabled: !!safeGet(cfg, ['channels', 'telegram', 'enabled'], false),
       telegramToken: safeGet(cfg, ['channels', 'telegram', 'token'], ''),
       telegramAllowFrom: toCsv(safeGet(cfg, ['channels', 'telegram', 'allowFrom'], [])),
@@ -133,6 +135,8 @@
     next.tools.web = next.tools.web || {};
     next.tools.web.search = next.tools.web.search || {};
     next.tools.web.search.apiKey = form.websearchApiKey;
+    next.tools.exec = next.tools.exec || {};
+    next.tools.exec.restrictToWorkspace = !!form.restrictToWorkspace;
 
     next.channels = next.channels || {};
     next.channels.telegram = next.channels.telegram || {};
@@ -190,7 +194,7 @@
     </div>
     <div class={`status-pill ${status === 'connected' ? 'ok' : status === 'error' ? 'err' : ''}`}>
       {#if loading}
-        Connecting…
+        Connectingï¿½
       {:else if status === 'connected'}
         Connected
       {:else}
@@ -225,6 +229,12 @@
             <input type="password" bind:value={form.websearchApiKey} placeholder="" />
           </label>
 
+          <label class="toggle">
+            <input type="checkbox" bind:checked={form.restrictToWorkspace} />
+            <span>Restrict Tools to Workspace</span>
+          </label>
+          <p class="hint">When enabled, file operations are limited to the workspace folder for security.</p>
+
           <div class="split">
             <label class="field">
               <span>Together API Key</span>
@@ -250,7 +260,7 @@
 
         <div class="actions">
           <button class="primary" on:click|preventDefault={saveQuick} disabled={saving}>
-            {saving ? 'Saving…' : 'Save Quick Settings'}
+            {saving ? 'Savingï¿½' : 'Save Quick Settings'}
           </button>
           <button class="ghost" on:click|preventDefault={loadConfig} disabled={loading}>
             Reload
@@ -318,7 +328,7 @@
 
       <div class="actions">
         <button class="primary" on:click|preventDefault={saveRaw} disabled={saving}>
-          {saving ? 'Saving…' : 'Save Raw JSON'}
+          {saving ? 'Savingï¿½' : 'Save Raw JSON'}
         </button>
         <button class="ghost" on:click|preventDefault={applyRawToForm}>
           Apply JSON to Form
