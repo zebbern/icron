@@ -25,6 +25,7 @@ from icron.agent.tools.shell import ExecTool
 from icron.agent.tools.web import WebSearchTool, WebFetchTool
 from icron.agent.tools.message import MessageTool
 from icron.agent.tools.spawn import SpawnTool
+from icron.agent.tools.memory_tools import RememberTool, RecallTool, NoteTodayTool
 from icron.agent.subagent import SubagentManager
 from icron.session.manager import SessionManager
 
@@ -134,6 +135,11 @@ class AgentLoop:
         # Spawn tool (for subagents)
         spawn_tool = SpawnTool(manager=self.subagents)
         self.tools.register(spawn_tool)
+        
+        # Memory tools
+        self.tools.register(RememberTool(workspace=self.workspace))
+        self.tools.register(RecallTool(workspace=self.workspace))
+        self.tools.register(NoteTodayTool(workspace=self.workspace))
     
     async def initialize(self) -> None:
         """Initialize async components including MCP."""
