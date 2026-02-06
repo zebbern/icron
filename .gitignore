@@ -2,7 +2,6 @@
 .env
 config.json
 node_modules/
-docs/
 *.egg-info/
 *.egg
 *.pyc
