@@ -660,20 +660,33 @@ def gateway(
         brave_api_key=config.tools.web.search.api_key or None,
         exec_config=config.tools.exec,
         mcp_servers=config.get_mcp_servers(),
+        cron_service=cron,
     )
     
     # Set cron callback (needs agent)
     async def on_cron_job(job: CronJob) -> str | None:
-        """Execute a cron job through the agent."""
+        """Execute a cron job - handles both agent turns and system events."""
+        from icron.bus.events import OutboundMessage
+        
+        # System events (reminders) deliver the message directly without agent processing
+        if job.payload.kind == "system_event":
+            if job.payload.deliver and job.payload.to:
+                await bus.publish_outbound(OutboundMessage(
+                    channel=job.payload.channel or "discord",
+                    chat_id=job.payload.to,
+                    content=job.payload.message
+                ))
+            return job.payload.message
+        
+        # Agent turns process through the agent
         response = await agent.process_direct(
             job.payload.message,
             session_key=f"cron:{job.id}",
         )
-        # Optionally deliver to channel
+        # Optionally deliver response to channel
         if job.payload.deliver and job.payload.to:
-            from icron.bus.events import OutboundMessage
             await bus.publish_outbound(OutboundMessage(
-                channel=job.payload.channel or "whatsapp",
+                channel=job.payload.channel or "discord",
                 chat_id=job.payload.to,
                 content=response or ""
             ))

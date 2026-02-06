@@ -7,20 +7,6 @@
 
 ⚡️ Delivers core agent functionality in just **~4,000** lines of code — **99% smaller** than Clawdbot's 430k+ lines.
 
-## 📢 News
-
-- **2026-02-01** 🎉 icron launched! Welcome to try 🐈 icron!
-
-## Key Features of icron:
-
-🪶 **Ultra-Lightweight**: Just ~4,000 lines of code — 99% smaller than Clawdbot - core functionality.
-
-🔬 **Research-Ready**: Clean, readable code that's easy to understand, modify, and extend for research.
-
-⚡️ **Lightning Fast**: Minimal footprint means faster startup, lower resource usage, and quicker iterations.
-
-💎 **Easy-to-Use**: One-click to depoly and you're ready to go.
-
 ## 🏗️ Architecture
 
 <p align="center">

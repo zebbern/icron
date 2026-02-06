@@ -10,6 +10,7 @@ from loguru import logger
 # Type hint for MCPManager - imported at runtime in initialize()
 if TYPE_CHECKING:
     from icron.mcp.tool_adapter import MCPManager
+    from icron.cron.service import CronService
 
 from icron.bus.events import InboundMessage, OutboundMessage
 from icron.bus.queue import MessageBus
@@ -26,6 +27,7 @@ from icron.agent.tools.web import WebSearchTool, WebFetchTool
 from icron.agent.tools.message import MessageTool
 from icron.agent.tools.spawn import SpawnTool
 from icron.agent.tools.memory_tools import RememberTool, RecallTool, NoteTodayTool
+from icron.agent.tools.reminder_tools import ReminderTool, ListRemindersool, CancelReminderTool
 from icron.agent.subagent import SubagentManager
 from icron.session.manager import SessionManager
 
@@ -52,6 +54,7 @@ class AgentLoop:
         brave_api_key: str | None = None,
         exec_config: "ExecToolConfig | None" = None,
         mcp_servers: dict[str, dict[str, Any]] | None = None,
+        cron_service: "CronService | None" = None,
     ):
         from icron.config.schema import ExecToolConfig
         self.bus = bus
@@ -62,6 +65,7 @@ class AgentLoop:
         self.brave_api_key = brave_api_key
         self.exec_config = exec_config or ExecToolConfig()
         self.mcp_servers = mcp_servers or {}
+        self.cron_service = cron_service
         
         self.context = ContextBuilder(workspace)
         self.sessions = SessionManager(workspace)
@@ -140,6 +144,14 @@ class AgentLoop:
         self.tools.register(RememberTool(workspace=self.workspace))
         self.tools.register(RecallTool(workspace=self.workspace))
         self.tools.register(NoteTodayTool(workspace=self.workspace))
+        
+        # Reminder tools (cron-based)
+        self._reminder_tool = ReminderTool(cron_service=self.cron_service)
+        self._list_reminders_tool = ListRemindersool(cron_service=self.cron_service)
+        self._cancel_reminder_tool = CancelReminderTool(cron_service=self.cron_service)
+        self.tools.register(self._reminder_tool)
+        self.tools.register(self._list_reminders_tool)
+        self.tools.register(self._cancel_reminder_tool)
     
     async def initialize(self) -> None:
         """Initialize async components including MCP."""
@@ -247,6 +259,10 @@ class AgentLoop:
         spawn_tool = self.tools.get("spawn")
         if isinstance(spawn_tool, SpawnTool):
             spawn_tool.set_context(msg.channel, msg.chat_id)
+        
+        # Update reminder tool context
+        if hasattr(self, '_reminder_tool'):
+            self._reminder_tool.set_context(msg.channel, msg.chat_id)
         
         # Build initial messages (use get_history for LLM-formatted messages)
         messages = self.context.build_messages(
