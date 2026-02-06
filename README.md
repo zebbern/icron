@@ -7,8 +7,8 @@
 Built with Python, it supports multiple chat channels (Discord, Telegram, WhatsApp) and can connect to any OpenAI-compatible LLM provider (Anthropic, OpenRouter, Together, Groq, vLLM). With a modular architecture and built-in tools for file operations, web search, shell execution, memory, and scheduling, icron is your personal assistant for research, coding, reminders, and more.
 
 <p align="center">
-<a href="#-install">Install</a> · <a href="#-quick-start">Quick Start</a> · <a href="#-key-features">Features</a> · <a href="#-chat-channels">Channels</a> · <a href="#-memory--persistence">Memory</a> · <a href="#-reminders--scheduling">Reminders</a><br>
-<a href="#-slash-commands">Commands</a> · <a href="#-mcp-server-support">MCP</a> · <a href="#-security">Security</a> · <a href="#️-configuration-reference">Config</a> · <a href="#️-cli-reference">CLI</a> · <a href="#-docker">Docker</a>
+<a href="#install">Install</a> · <a href="#quick-start">Quick Start</a> · <a href="#key-features">Features</a> · <a href="#chat-channels">Channels</a> · <a href="#memory--persistence">Memory</a> · <a href="#reminders--scheduling">Reminders</a><br>
+<a href="#slash-commands">Commands</a> · <a href="#mcp-server-support">MCP</a> · <a href="#security">Security</a> · <a href="#configuration-reference">Config</a> · <a href="#cli-reference">CLI</a> · <a href="#docker">Docker</a>
 </p>
 
 ### Core Capabilities
@@ -26,7 +26,7 @@ Built with Python, it supports multiple chat channels (Discord, Telegram, WhatsA
 | **Subagents** | `spawn` (background task delegation) |
 | **MCP** | Connect external MCP servers for unlimited extensibility |
 
-## ✨ Key Features
+## Key Features
 
 - **Semantic Memory**: OpenClaw-style permanent Markdown memory with hybrid BM25 + vector search. Auto-detects embedding providers (OpenAI, Gemini, Ollama).
 - **Multi-Channel**: Chat through Discord, Telegram, or WhatsApp with unified conversation history.
@@ -34,7 +34,7 @@ Built with Python, it supports multiple chat channels (Discord, Telegram, WhatsA
 - **MCP Integration**: Extend capabilities by connecting external MCP servers.
 - **Skills System**: Modular task automation with built-in and custom skills.
 
-## 📦 Install
+## Install
 
 **From source** (recommended for development)
 
@@ -50,7 +50,7 @@ pip install -e .
 pip install icron
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 **1. Initialize** (choose one)
 
@@ -121,7 +121,7 @@ icron agent -m "Hello from my local LLM!"
 
 > The `apiKey` can be any non-empty string for local servers.
 
-## 💬 Chat Channels
+## Chat Channels
 
 Talk to icron through Telegram, WhatsApp, or Discord.
 
@@ -236,7 +236,7 @@ icron gateway
 
 </details>
 
-## 🌐 Web UI
+## Web UI
 
 The gateway provides a web interface for configuration.
 
@@ -252,7 +252,7 @@ icron gateway
 - Security settings (restrict tools to workspace)
 - Context limits (max tokens for conversation history)
 
-## 🧠 Memory & Persistence
+## Memory & Persistence
 
 icron has persistent memory that survives restarts:
 
@@ -269,7 +269,7 @@ icron has persistent memory that survives restarts:
 
 Memory is stored in `~/.icron/workspace/memory/` as markdown files.
 
-## ⏰ Reminders & Scheduling
+## Reminders & Scheduling
 
 **Set reminders naturally:**
 
@@ -300,7 +300,7 @@ icron cron list
 icron cron remove <job_id>
 ```
 
-## ⚡ Slash Commands
+## Slash Commands
 
 Quick commands that bypass the LLM for instant response:
 
@@ -322,7 +322,7 @@ Quick commands that bypass the LLM for instant response:
 | `/templates` | List available templates |
 | `/template [name]` | Run a template by name |
 
-## 🔧 MCP Server Support
+## MCP Server Support
 
 icron can connect to external [MCP servers](https://modelcontextprotocol.io/) for extended functionality.
 
@@ -347,7 +347,7 @@ icron can connect to external [MCP servers](https://modelcontextprotocol.io/) fo
 
 MCP servers appear as additional tools the agent can use.
 
-## 🔒 Security
+## Security
 
 **Workspace restriction:**
 
@@ -368,7 +368,7 @@ When enabled, file operations are limited to `~/.icron/workspace/`.
 - Command execution has configurable timeout (default 60s)
 - Output is truncated to prevent context overflow
 
-## ⚙️ Configuration Reference
+## Configuration Reference
 
 Config file: `~/.icron/config.json`
 
@@ -445,7 +445,7 @@ Config file: `~/.icron/config.json`
 
 </details>
 
-## 🖥️ CLI Reference
+## CLI Reference
 
 | Command | Description |
 |---------|-------------|
@@ -462,7 +462,7 @@ Config file: `~/.icron/config.json`
 | `icron cron add` | Add a scheduled job |
 | `icron cron remove <id>` | Remove a scheduled job |
 
-## 🐳 Docker
+## Docker
 
 ```bash
 # Build the image
@@ -483,7 +483,7 @@ docker run -v ~/.icron:/root/.icron -p 18790:18790 icron gateway
 - Set environment variables: `TOGETHER_API_KEY`, `MODEL`, `ICRON_WRITE_CONFIG=1`
 - Optional: `TELEGRAM_TOKEN`, `TELEGRAM_ALLOW_FROM`, `WEBSEARCH_API_KEY`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 icron/
@@ -504,7 +504,7 @@ icron/
 └── cli/            # CLI commands
 ```
 
-## 📚 Documentation (DRY)
+## Documentation (DRY)
 
 Keep documentation in `/docs` for reusability:
 
@@ -519,7 +519,7 @@ Keep documentation in `/docs` for reusability:
 
 > **Rule of thumb:** If you explain it twice, document it once.
 
-## 🤝 Contribute
+## Contribute
 
 PRs welcome! The codebase is intentionally small and readable.
 
