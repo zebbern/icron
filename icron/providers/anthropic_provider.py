@@ -110,7 +110,7 @@ class AnthropicProvider(LLMProvider):
         for i, m in enumerate(messages):
             role = m.get('role', 'unknown')
             tool_calls = m.get('tool_calls', [])
-            tool_call_id = m.get('tool_call_id', None)
+            tool_call_id = m.get('tool_call_id')
             logger.debug(f"  Original [{i}] role={role}, tool_calls={len(tool_calls) if tool_calls else 0}, tool_call_id={tool_call_id}")
         
         logger.debug(f"[DEBUG] Anthropic: Converted messages count: {len(anthropic_messages)}")

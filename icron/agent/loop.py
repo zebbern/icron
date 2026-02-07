@@ -494,7 +494,7 @@ class AgentLoop:
             for i, m in enumerate(messages):
                 role = m.get('role', 'unknown')
                 tool_calls = m.get('tool_calls', [])
-                tool_call_id = m.get('tool_call_id', None)
+                tool_call_id = m.get('tool_call_id')
                 content_preview = str(m.get('content', ''))[:100]
                 logger.debug(f"  [{i}] role={role}, tool_calls={len(tool_calls) if tool_calls else 0}, tool_call_id={tool_call_id}, content={content_preview}...")
             
@@ -528,7 +528,7 @@ class AgentLoop:
                 for i, m in enumerate(messages):
                     role = m.get('role', 'unknown')
                     tool_calls = m.get('tool_calls', [])
-                    tool_call_id = m.get('tool_call_id', None)
+                    tool_call_id = m.get('tool_call_id')
                     logger.debug(f"  [{i}] role={role}, tool_calls={len(tool_calls) if tool_calls else 0}, tool_call_id={tool_call_id}")
                 
                 # Execute tools
@@ -549,7 +549,7 @@ class AgentLoop:
                     for i, m in enumerate(messages):
                         role = m.get('role', 'unknown')
                         tool_calls = m.get('tool_calls', [])
-                        tool_call_id = m.get('tool_call_id', None)
+                        tool_call_id = m.get('tool_call_id')
                         logger.debug(f"  [{i}] role={role}, tool_calls={len(tool_calls) if tool_calls else 0}, tool_call_id={tool_call_id}")
             else:
                 # No tool calls, we're done
