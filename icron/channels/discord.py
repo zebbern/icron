@@ -1,5 +1,6 @@
 """Discord channel implementation using discord.py."""
 
+from typing import Any
 
 from loguru import logger
 
@@ -21,7 +22,7 @@ class DiscordChannel(BaseChannel):
     def __init__(self, config: DiscordConfig, bus: MessageBus):
         super().__init__(config, bus)
         self.config: DiscordConfig = config
-        self._client: any = None
+        self._client: Any | None = None
         self._running = False
 
     async def start(self) -> None:
