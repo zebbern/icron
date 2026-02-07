@@ -67,6 +67,7 @@ class CronTool(Tool):
         job_id: str | None = None,
         **kwargs: Any
     ) -> str:
+        """Execute a cron scheduling action."""
         if action == "add":
             return self._add_job(message, every_seconds, cron_expr)
         elif action == "list":

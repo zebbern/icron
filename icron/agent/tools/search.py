@@ -53,6 +53,7 @@ class GlobTool(Tool):
         }
 
     async def execute(self, pattern: str, path: str = "", **kwargs: Any) -> str:
+        """Find files matching a glob pattern."""
         try:
             # Determine search root
             if path:
@@ -190,6 +191,7 @@ class GrepTool(Tool):
         case_insensitive: bool = False,
         **kwargs: Any,
     ) -> str:
+        """Search file contents using regex."""
         try:
             # Compile regex with safety checks (CRIT-1)
             try:

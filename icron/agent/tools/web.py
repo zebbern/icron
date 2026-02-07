@@ -62,6 +62,7 @@ class WebSearchTool(Tool):
         self.max_results = max_results
     
     async def execute(self, query: str, count: int | None = None, **kwargs: Any) -> str:
+        """Execute a web search using Brave Search API."""
         if not self.api_key:
             return "Error: BRAVE_API_KEY not configured"
         
@@ -109,6 +110,7 @@ class WebFetchTool(Tool):
         self.max_chars = max_chars
     
     async def execute(self, url: str, extractMode: str = "markdown", maxChars: int | None = None, **kwargs: Any) -> str:
+        """Fetch and extract content from a URL."""
         from readability import Document
 
         max_chars = maxChars or self.max_chars

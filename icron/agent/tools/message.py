@@ -70,6 +70,7 @@ class MessageTool(Tool):
         chat_id: str | None = None,
         **kwargs: Any
     ) -> str:
+        """Send a message to the given channel and chat."""
         # Validate content before sending (allow empty content if media is present)
         if (not content or not content.strip()) and not media:
             return "Error: Cannot send empty message without media"
