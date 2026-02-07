@@ -245,8 +245,8 @@ class MCPClient:
                 self._closed = True
                 logger.debug("MCP client closed")
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "MCPClient":
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.close()
