@@ -56,7 +56,7 @@ class ToolRegistry:
         try:
             errors = tool.validate_params(params)
             if errors:
-                return f"Error: Invalid parameters for tool '{name}': " + "; ".join(errors)
+                return f"Error: Invalid parameters for tool '{name}': {'; '.join(errors)}"
             return await tool.execute(**params)
         except Exception as e:
             return f"Error executing {name}: {e}"

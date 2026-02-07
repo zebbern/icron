@@ -97,11 +97,11 @@ class MemoryStore:
         # Long-term memory
         long_term = self.read_long_term()
         if long_term:
-            parts.append("## Long-term Memory\n" + long_term)
+            parts.append(f"## Long-term Memory\n{long_term}")
         
         # Today's notes
         today = self.read_today()
         if today:
-            parts.append("## Today's Notes\n" + today)
+            parts.append(f"## Today's Notes\n{today}")
         
         return "\n\n".join(parts) if parts else ""
