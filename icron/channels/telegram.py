@@ -1,6 +1,7 @@
 """Telegram channel implementation using python-telegram-bot."""
 
 import asyncio
+import html
 import re
 from pathlib import Path
 
@@ -44,7 +45,7 @@ def _markdown_to_telegram_html(text: str) -> str:
     text = re.sub(r'^>\s*(.*)$', r'\1', text, flags=re.MULTILINE)
     
     # 5. Escape HTML special characters
-    text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    text = html.escape(text, quote=False)
     
     # 6. Links [text](url) - must be before bold/italic to handle nested cases
     text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', text)
