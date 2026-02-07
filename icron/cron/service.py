@@ -33,7 +33,8 @@ def _compute_next_run(schedule: CronSchedule, now_ms: int) -> int | None:
             cron = croniter(schedule.expr, time.time())
             next_time = cron.get_next()
             return int(next_time * 1000)
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Invalid cron expression '{schedule.expr}': {e}")
             return None
     
     return None
