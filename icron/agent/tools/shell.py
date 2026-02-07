@@ -183,10 +183,7 @@ class ExecTool(Tool):
 
     def _contains_shell_features(self, command: str) -> bool:
         """Check if command contains shell-specific features that need shell=True."""
-        for pattern in SHELL_FEATURE_PATTERNS:
-            if re.search(pattern, command):
-                return True
-        return False
+        return any(re.search(pattern, command) for pattern in SHELL_FEATURE_PATTERNS)
 
     @staticmethod
     def _contains_dangerous_metacharacters(command: str) -> set[str]:
