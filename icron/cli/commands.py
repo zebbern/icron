@@ -310,7 +310,7 @@ def setup(
     console.print("[bold]Step 1/5: LLM Provider[/bold]")
     console.print("Which AI provider would you like to use?\n")
     
-    providers = list(PROVIDER_INFO.keys())
+    providers = list(PROVIDER_INFO)
     for i, prov in enumerate(providers, 1):
         info = PROVIDER_INFO[prov]
         console.print(f"  [{i}] {info['name']}")
