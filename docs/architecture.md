@@ -46,11 +46,13 @@ Icron is a Python-based AI agent framework with a modular architecture designed 
 ├─────────────────┤  ├─────────────────┤  ├─────────────────┤
 │ • File tools    │  │ • History       │  │ • Anthropic     │
 │ • Shell tools   │  │ • Token mgmt    │  │ • OpenAI        │
-│ • Memory tools  │  │ • Persistence   │  │ • vLLM          │
-│ • Web tools     │  │                 │  │ • Ollama        │
-│ • MCP tools     │  │                 │  │ • Gemini        │
-│ • Spawn tools   │  │                 │  │ • Gemini        │
-│ • Screenshot    │  │                 │  │                 │
+│ • Memory tools  │  │ • Persistence   │  │ • Gemini        │
+│ • Web tools     │  │                 │  │ • LazyLLM       │
+│ • MCP tools     │  │                 │  │ • Groq          │
+│ • Spawn tools   │  │                 │  │ • Together      │
+│ • Screenshot    │  │                 │  │ • OpenRouter    │
+│ • Cron tools    │  │                 │  │                 │
+│ • Reminder tools│  │                 │  │                 │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
                               │
                               ▼
@@ -71,6 +73,7 @@ icron/
 ├── agent/           # Core agent loop and orchestration
 │   ├── loop.py      # Main agent processing loop
 │   ├── commands.py  # Slash command handler & templates
+│   ├── collaborate.py # Multi-model collaboration
 │   ├── context.py   # System prompt builder
 │   ├── memory.py    # Persistent memory
 │   ├── skills.py    # Skills loader
@@ -80,7 +83,10 @@ icron/
 │   ├── events.py    # Event definitions
 │   └── queue.py     # Message queue
 ├── channels/        # Chat channel integrations
+│   ├── base.py      # Base channel class
 │   ├── discord.py   # Discord bot
+│   ├── feishu.py    # Feishu/Lark bot
+│   ├── slack.py     # Slack bot (Socket Mode)
 │   ├── telegram.py  # Telegram bot
 │   ├── whatsapp.py  # WhatsApp bridge
 │   └── manager.py   # Channel coordinator
@@ -96,18 +102,26 @@ icron/
 │   └── service.py   # Heartbeat service
 ├── mcp/             # MCP server integration
 │   ├── client.py    # MCP client
-│   └── tool_adapter.py # Tool wrapper
+│   ├── security.py  # Security restrictions
+│   ├── tool_adapter.py # Tool wrapper
+│   └── transport/   # Transport implementations
+│       ├── stdio.py # Standard I/O transport
+│       └── sse.py   # Server-sent events transport
 ├── providers/       # LLM provider integrations
 │   ├── anthropic_provider.py
 │   ├── openai_provider.py
 │   ├── gemini_provider.py
+│   ├── lazyllm_provider.py
+│   ├── transcription.py  # Voice transcription
 │   └── factory.py   # Provider factory
 ├── session/         # Session and history management
 │   └── manager.py   # Conversation history, token trimming
 ├── skills/          # Built-in skills
+│   ├── cron/        # Cron scheduling
 │   ├── weather/     # Weather lookups
 │   ├── github/      # GitHub operations
 │   ├── summarize/   # Content summarization
+│   ├── skill-creator/ # Create new skills
 │   └── tmux/        # Tmux session control
 └── utils/           # Shared utilities
     ├── tokens.py    # Token counting
