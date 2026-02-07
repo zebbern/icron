@@ -183,7 +183,7 @@ class TestMemoryStore:
                 
                 # Some lines should overlap (be in both chunks)
                 overlap = current_lines & next_lines
-                assert len(overlap) > 0, "Expected overlap between consecutive chunks"
+                assert overlap, "Expected overlap between consecutive chunks"
 
     def test_chunk_text_empty(self, tmp_path: Path) -> None:
         """Test chunking empty or whitespace-only text."""
