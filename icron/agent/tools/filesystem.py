@@ -2,7 +2,7 @@
 
 import shutil
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -16,7 +16,7 @@ class WorkspaceSecurityError(Exception):
 
 def validate_workspace_path(
     path_str: str,
-    workspace: Optional[Path],
+    workspace: Path | None,
     restrict_to_workspace: bool = True,
 ) -> Path:
     """
@@ -78,7 +78,7 @@ class ReadFileTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
@@ -134,7 +134,7 @@ class WriteFileTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
@@ -190,7 +190,7 @@ class EditFileTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
@@ -264,7 +264,7 @@ class ListDirTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
@@ -327,7 +327,7 @@ class RenameFileTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
@@ -403,7 +403,7 @@ class MoveFileTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
@@ -483,7 +483,7 @@ class CopyFileTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
@@ -567,7 +567,7 @@ class CreateDirTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
