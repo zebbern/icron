@@ -245,10 +245,10 @@ Use for complex or time-consuming tasks that can run independently. The subagent
 
 Direct tool APIs for setting and managing reminders programmatically.
 
-### reminder_set
+### set_reminder
 Set a reminder to be delivered after a delay.
 ```
-reminder_set(message: str, delay: str) -> str
+set_reminder(message: str, delay: str) -> str
 ```
 
 **Parameters:**
@@ -257,28 +257,28 @@ reminder_set(message: str, delay: str) -> str
 
 **Examples:**
 ```
-reminder_set("Check the build status", "15m")
-reminder_set("Call John back", "2h")
-reminder_set("Submit weekly report", "1d")
+set_reminder("Check the build status", "15m")
+set_reminder("Call John back", "2h")
+set_reminder("Submit weekly report", "1d")
 ```
 
-### reminder_list
+### list_reminders
 List all active reminders.
 ```
-reminder_list() -> str
+list_reminders() -> str
 ```
 
 Returns a formatted list of pending reminders with their IDs, messages, and scheduled times.
 
-### reminder_cancel
+### cancel_reminder
 Cancel a specific reminder by ID.
 ```
-reminder_cancel(reminder_id: str) -> str
+cancel_reminder(reminder_id: str) -> str
 ```
 
 **Example:**
 ```
-reminder_cancel("abc123")
+cancel_reminder("abc123")
 ```
 
 ## Scheduled Reminders (Cron)
