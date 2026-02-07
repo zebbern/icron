@@ -24,7 +24,7 @@ class Transport(ABC):
         await transport.disconnect()
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
         self._connected = False
 

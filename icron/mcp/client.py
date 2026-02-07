@@ -14,7 +14,7 @@ from icron.mcp.transport import SSETransport, Transport, TransportError
 class MCPServerConnection:
     """Represents a connection to a single MCP server."""
 
-    def __init__(self, name: str, session: ClientSession, tools: list[dict[str, Any]]):
+    def __init__(self, name: str, session: ClientSession, tools: list[dict[str, Any]]) -> None:
         self.name = name
         self.session = session
         self.tools = tools
@@ -62,7 +62,7 @@ class MCPClient:
         await client.close()
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.exit_stack = AsyncExitStack()
         self.connections: dict[str, MCPServerConnection] = {}
         self._transports: dict[str, Transport] = {}

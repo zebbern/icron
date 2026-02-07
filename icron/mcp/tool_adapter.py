@@ -112,7 +112,7 @@ class MCPManager:
         })
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._client = MCPClient()
         self._tools: list[MCPToolAdapter] = []
         self._initialized = False
