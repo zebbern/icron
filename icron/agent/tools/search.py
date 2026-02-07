@@ -146,7 +146,7 @@ class GrepTool(Tool):
                 if b'\x00' in chunk:
                     return True
             return False
-        except Exception:
+        except (OSError, IOError):
             return True
 
     @property
