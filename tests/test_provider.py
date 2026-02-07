@@ -17,7 +17,7 @@ class TestLazyLLMProvider:
             api_key=API_KEY,
             source=SOURCE,
             default_model=MODEL,
-            type="LLM",
+            model_type="LLM",
         )
 
         assert provider.source == SOURCE
@@ -32,7 +32,7 @@ class TestLazyLLMProvider:
             api_key=API_KEY,
             source=SOURCE,
             default_model=MODEL,
-            type="LLM",
+            model_type="LLM",
         )
 
         response = asyncio.run(
@@ -48,7 +48,7 @@ class TestLazyLLMProvider:
 
     def test_invalid_model_type_raises(self):
         with pytest.raises(ValueError):
-            LazyLLMProvider(type="AUDIO")
+            LazyLLMProvider(model_type="AUDIO")
 
     def test_multimodal_payload_conversion(self):
         """Test VLM multimodal message conversion handles system prompts, history, and images."""
@@ -56,7 +56,7 @@ class TestLazyLLMProvider:
             api_key=API_KEY,
             source=SOURCE,
             default_model=MODEL,
-            type="VLM",
+            model_type="VLM",
         )
 
         system_prompt, history, current_input = provider._messages_to_lazyllm_payload(
@@ -89,7 +89,7 @@ class TestLazyLLMProvider:
             api_key=API_KEY,
             source=SOURCE,
             default_model=MODEL,
-            type="LLM",
+            model_type="LLM",
         )
 
         response = provider._parse_response(
