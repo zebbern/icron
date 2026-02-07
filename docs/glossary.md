@@ -72,16 +72,16 @@ The component (`icron/agent/skills.py`) that discovers and loads skills from bot
 
 ### Memory Tools
 
-- `memory_store` - Save key-value data
-- `memory_search` - Search stored memories
-- `memory_list` - List all memories
-- `memory_delete` - Delete memory entries
+- `memory_write` - Save/update memory entries
+- `memory_search` - Search stored memories semantically
+- `memory_list` - List all memory files
+- `memory_get` - Read specific memory file
 
 ### Reminder Tools
 
-- `reminder_set` - Schedule future notification
-- `reminder_list` - View pending reminders
-- `reminder_cancel` - Remove a reminder
+- `set_reminder` - Schedule future notification
+- `list_reminders` - View pending reminders
+- `cancel_reminder` - Remove a reminder by ID
 
 ### Shell Tools
 

@@ -88,31 +88,32 @@ Icron can connect to MCP (Model Context Protocol) servers to extend capabilities
 
 See [MCP Server Registry](https://github.com/modelcontextprotocol/servers) for more.
 
-## Web Fetching
+## Web Tools
 
-### Built-in httpx
+### web_search
 
-Simple HTTP fetching for static content:
-
-```python
-# Automatic for most URLs
-fetch_url("https://example.com")
-```
-
-### Playwright (Dynamic Sites)
-
-For JavaScript-rendered pages:
+Search the web using Brave Search API:
 
 ```python
-# Enabled via MCP or built-in
-fetch_url("https://spa-site.com", use_playwright=True)
+# Agent uses this tool automatically when searching
+web_search(query="python async tutorial", count=5)
 ```
 
-Setup:
-```bash
-pip install playwright
-playwright install chromium
+Requires `BRAVE_SEARCH_API_KEY` or config setting `tools.web.search.apiKey`.
+
+### web_fetch
+
+Fetch URL and extract readable content:
+
+```python
+# Automatically extracts main content, converts HTML to markdown
+web_fetch(url="https://example.com", extractMode="markdown")
 ```
+
+Parameters:
+- `url` - URL to fetch
+- `extractMode` - "markdown" (default) or "text"
+- `maxChars` - Maximum characters to return
 
 ## Screenshot Tool
 

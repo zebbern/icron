@@ -142,11 +142,13 @@ Templates provide structured workflows for common tasks:
 
 ## Adding a New LLM Provider
 
-1. **Create provider** in `icron/llm/`:
+1. **Create provider** in `icron/providers/`:
    ```python
-   # icron/llm/newprovider.py
-   class NewProvider:
-       def complete(self, messages, tools):
+   # icron/providers/newprovider_provider.py
+   from icron.providers.base import BaseProvider
+   
+   class NewProvider(BaseProvider):
+       async def complete(self, messages, tools):
            # Call API, return response
            pass
    ```
