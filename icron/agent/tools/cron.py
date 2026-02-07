@@ -10,7 +10,7 @@ from icron.cron.types import CronSchedule
 class CronTool(Tool):
     """Tool to schedule reminders and recurring tasks."""
     
-    def __init__(self, cron_service: CronService):
+    def __init__(self, cron_service: CronService) -> None:
         self._cron = cron_service
         self._channel = ""
         self._chat_id = ""

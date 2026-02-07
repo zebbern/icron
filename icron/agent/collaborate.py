@@ -85,7 +85,7 @@ class CollaborationService:
     until they reach consensus or max rounds.
     """
     
-    def __init__(self, config: Config):
+    def __init__(self, config: Config) -> None:
         self.config = config
         self._providers: list[ProviderInstance] | None = None
     

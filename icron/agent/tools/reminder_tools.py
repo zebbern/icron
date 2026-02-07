@@ -103,7 +103,7 @@ class ReminderTool(Tool):
     at the specified time.
     """
     
-    def __init__(self, cron_service: "CronService | None" = None, channel: str = "", chat_id: str = ""):
+    def __init__(self, cron_service: "CronService | None" = None, channel: str = "", chat_id: str = "") -> None:
         self._cron_service = cron_service
         self._channel = channel
         self._chat_id = chat_id
@@ -213,7 +213,7 @@ class ReminderTool(Tool):
 class ListRemindersTool(Tool):
     """Tool to list active reminders."""
     
-    def __init__(self, cron_service: "CronService | None" = None):
+    def __init__(self, cron_service: "CronService | None" = None) -> None:
         self._cron_service = cron_service
     
     def set_cron_service(self, cron_service: "CronService") -> None:
@@ -259,7 +259,7 @@ class ListRemindersTool(Tool):
 class CancelReminderTool(Tool):
     """Tool to cancel a reminder."""
     
-    def __init__(self, cron_service: "CronService | None" = None):
+    def __init__(self, cron_service: "CronService | None" = None) -> None:
         self._cron_service = cron_service
     
     def set_cron_service(self, cron_service: "CronService") -> None:

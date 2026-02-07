@@ -16,7 +16,7 @@ class SpawnTool(Tool):
     to the main agent when complete.
     """
     
-    def __init__(self, manager: "SubagentManager"):
+    def __init__(self, manager: "SubagentManager") -> None:
         self._manager = manager
         self._origin_channel = "cli"
         self._origin_chat_id = "direct"

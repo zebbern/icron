@@ -88,7 +88,7 @@ class ScreenshotTool(Tool):
         "required": ["url"]
     }
 
-    def __init__(self, workspace_path: str | None = None, timeout_ms: int = 30000):
+    def __init__(self, workspace_path: str | None = None, timeout_ms: int = 30000) -> None:
         """
         Initialize the screenshot tool.
 
