@@ -368,6 +368,12 @@ class AgentLoop:
             except Exception as e:
                 logger.error(f"Error closing MCP manager: {e}")
             self.mcp_manager = None
+        if self.embedding_provider and hasattr(self.embedding_provider, 'close'):
+            try:
+                await self.embedding_provider.close()
+            except Exception as e:
+                logger.error(f"Error closing embedding provider: {e}")
+            self.embedding_provider = None
         self._initialized = False
 
     async def run(self) -> None:
