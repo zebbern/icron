@@ -319,7 +319,7 @@ class MemoryGetTool(Tool):
         try:
             file_path = file_path.resolve()
             workspace_resolved = self.workspace.resolve()
-            if not str(file_path).startswith(str(workspace_resolved)):
+            if not file_path.is_relative_to(workspace_resolved):
                 return "Error: File path must be within the workspace"
         except Exception:
             return "Error: Invalid file path"
