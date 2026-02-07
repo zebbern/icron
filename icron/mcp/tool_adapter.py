@@ -18,7 +18,7 @@ from icron.mcp.security import (
 
 class MCPToolAdapter(Tool):
     """
-    Adapter that wraps an MCP tool as a icron Tool.
+    Adapter that wraps an MCP tool as an icron Tool.
 
     This allows MCP tools to be used seamlessly with icron's tool system.
 
