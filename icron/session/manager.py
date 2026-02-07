@@ -241,7 +241,8 @@ class SessionManager:
                         "message_count": message_count,
                         "path": str(path)
                     })
-            except Exception:
+            except Exception as e:
+                logger.debug("Skipped session %s: %s", path.name, e)
                 continue
         
         return sorted(sessions, key=lambda x: x.get("updated_at", ""), reverse=True)
