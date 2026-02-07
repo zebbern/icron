@@ -490,7 +490,7 @@ class AgentLoop:
             iteration += 1
             
             # DEBUG: Log messages before sending to provider
-            logger.debug(f"[DEBUG] Iteration {iteration}: Messages BEFORE provider.chat():")
+            logger.debug(f"Iteration {iteration}: Messages BEFORE provider.chat():")
             for i, m in enumerate(messages):
                 role = m.get('role', 'unknown')
                 tool_calls = m.get('tool_calls', [])
@@ -524,7 +524,7 @@ class AgentLoop:
                 )
                 
                 # DEBUG: Log messages after adding assistant message
-                logger.debug("[DEBUG] Messages AFTER add_assistant_message:")
+                logger.debug("Messages AFTER add_assistant_message:")
                 for i, m in enumerate(messages):
                     role = m.get('role', 'unknown')
                     tool_calls = m.get('tool_calls', [])
@@ -545,7 +545,7 @@ class AgentLoop:
                     )
                     
                     # DEBUG: Log messages after adding tool result
-                    logger.debug(f"[DEBUG] Messages AFTER add_tool_result for {tool_call.name} (id={tool_call.id}):")
+                    logger.debug(f"Messages AFTER add_tool_result for {tool_call.name} (id={tool_call.id}):")
                     for i, m in enumerate(messages):
                         role = m.get('role', 'unknown')
                         tool_calls = m.get('tool_calls', [])

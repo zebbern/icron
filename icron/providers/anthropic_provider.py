@@ -106,14 +106,14 @@ class AnthropicProvider(LLMProvider):
         anthropic_messages = self._convert_messages_to_anthropic(messages)
         
         # DEBUG: Log the converted messages
-        logger.debug(f"[DEBUG] Anthropic: Original messages count: {len(messages)}")
+        logger.debug(f"Anthropic: Original messages count: {len(messages)}")
         for i, m in enumerate(messages):
             role = m.get('role', 'unknown')
             tool_calls = m.get('tool_calls', [])
             tool_call_id = m.get('tool_call_id')
             logger.debug(f"  Original [{i}] role={role}, tool_calls={len(tool_calls) if tool_calls else 0}, tool_call_id={tool_call_id}")
         
-        logger.debug(f"[DEBUG] Anthropic: Converted messages count: {len(anthropic_messages)}")
+        logger.debug(f"Anthropic: Converted messages count: {len(anthropic_messages)}")
         for i, m in enumerate(anthropic_messages):
             role = m.get('role', 'unknown')
             content = m.get('content')
