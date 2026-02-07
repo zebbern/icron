@@ -84,7 +84,7 @@ class Session:
             logger.debug(f"Trimmed {trimmed_count} old messages from history ({total_tokens} tokens kept)")
         
         # Restore chronological order
-        return list(reversed(result))
+        return result[::-1]
     
     def clear(self) -> None:
         """Clear all messages in the session."""
