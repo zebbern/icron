@@ -100,7 +100,7 @@ class GeminiProvider(LLMProvider):
         gen_config = types.GenerateContentConfig(
             temperature=temperature,
             max_output_tokens=max_tokens,
-            system_instruction=system if system else None,
+            system_instruction=system or None,
         )
 
         try:
