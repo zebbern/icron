@@ -24,7 +24,7 @@ class LLMResponse:
     @property
     def has_tool_calls(self) -> bool:
         """Check if response contains tool calls."""
-        return len(self.tool_calls) > 0
+        return bool(self.tool_calls)
 
 
 class LLMProvider(ABC):
