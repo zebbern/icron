@@ -1,5 +1,7 @@
 from typing import Any
 
+import pytest
+
 from icron.agent.tools.base import Tool
 from icron.agent.tools.registry import ToolRegistry
 
@@ -81,6 +83,7 @@ def test_validate_params_ignores_unknown_fields() -> None:
     assert errors == []
 
 
+@pytest.mark.asyncio
 async def test_registry_returns_validation_error() -> None:
     reg = ToolRegistry()
     reg.register(SampleTool())
