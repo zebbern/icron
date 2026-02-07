@@ -47,5 +47,9 @@ RUN mkdir -p /root/.icron
 # Gateway default port
 EXPOSE 3883
 
+# Health check for the gateway
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:3883/health || exit 1
+
 ENTRYPOINT ["icron"]
 CMD ["status"]

@@ -20,6 +20,16 @@ services:
     ports:
       # Gateway port (optional, for HTTP API)
       - "3883:3883"
+    # Health check for monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3883/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # Security options
+    security_opt:
+      - no-new-privileges:true
     # For WhatsApp bridge headless browser support
     # Uncomment if using WhatsApp channel
     # shm_size: '2gb'

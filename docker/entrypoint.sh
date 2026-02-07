@@ -8,6 +8,18 @@
 
 set -e
 
+# Graceful shutdown handling
+ICRON_PID=""
+cleanup() {
+    echo "$(date): Received shutdown signal, stopping icron..."
+    if [ -n "$ICRON_PID" ]; then
+        kill -TERM "$ICRON_PID" 2>/dev/null || true
+        wait "$ICRON_PID" 2>/dev/null || true
+    fi
+    exit 0
+}
+trap cleanup SIGTERM SIGINT
+
 # Use ICRON_WORKSPACE if set, otherwise default to /app/workspace
 WORKSPACE="${ICRON_WORKSPACE:-/app/workspace}"
 RESTART_SIGNAL="$WORKSPACE/.restart_signal"
@@ -18,8 +30,12 @@ echo "Workspace: $WORKSPACE"
 while true; do
     echo "$(date): Starting icron..."
 
-    # Run icron gateway and capture exit code
-    icron gateway || exit_code=$?
+    # Run icron gateway in background and capture PID
+    exit_code=0
+    icron gateway &
+    ICRON_PID=$!
+    wait $ICRON_PID || exit_code=$?
+    ICRON_PID=""
 
     # Check for restart signal
     if [ -f "$RESTART_SIGNAL" ]; then
@@ -33,8 +49,8 @@ while true; do
     fi
 
     # Normal exit or error
-    echo "$(date): icron exited with code: ${exit_code:-0}"
+    echo "$(date): icron exited with code: ${exit_code}"
 
     # Exit if icron exited normally (code 0) or with error
-    exit ${exit_code:-0}
+    exit ${exit_code}
 done
