@@ -274,7 +274,6 @@ class TelegramChannel(BaseChannel):
                 ext = self._get_extension(media_type, getattr(media_file, 'mime_type', None))
 
                 # Save to workspace/media/
-                from pathlib import Path
                 media_dir = Path.home() / ".icron" / "media"
                 media_dir.mkdir(parents=True, exist_ok=True)
 

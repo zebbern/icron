@@ -4,6 +4,7 @@ This module provides a CommandHandler class that processes slash commands
 from users, handling session management and delegating certain tasks to the agent.
 """
 
+import json
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -765,7 +766,6 @@ class CommandHandler:
             metadata = data.get("metadata", {})
             if isinstance(metadata, str):
                 try:
-                    import json
                     metadata = json.loads(metadata)
                 except json.JSONDecodeError:
                     metadata = {}
