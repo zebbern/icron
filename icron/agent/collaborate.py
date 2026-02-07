@@ -97,7 +97,7 @@ class CollaborationService:
         
         providers: list[ProviderInstance] = []
         
-        for provider_name in PROVIDER_INFO.keys():
+        for provider_name in PROVIDER_INFO:
             provider_config = getattr(self.config.providers, provider_name, None)
             if not provider_config:
                 continue
