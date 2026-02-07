@@ -143,7 +143,7 @@ class SessionManager:
             metadata = {}
             created_at = None
             
-            with open(path) as f:
+            with open(path, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line:
@@ -171,7 +171,7 @@ class SessionManager:
         """Save a session to disk."""
         path = self._get_session_path(session.key)
         
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             # Write metadata first
             metadata_line = {
                 "_type": "metadata",
@@ -221,7 +221,7 @@ class SessionManager:
                 message_count = 0
                 metadata_info = {}
                 
-                with open(path) as f:
+                with open(path, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if not line:
@@ -325,7 +325,7 @@ class SessionManager:
             first_message_at = None
             last_message_at = None
             
-            with open(path) as f:
+            with open(path, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line:
