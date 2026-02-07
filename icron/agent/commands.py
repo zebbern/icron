@@ -328,13 +328,12 @@ class CommandHandler:
             topic = args.lower().strip()
             if topic in HELP_TOPICS:
                 return HELP_TOPICS[topic], True
-            else:
-                available = ", ".join(sorted(HELP_TOPICS.keys()))
-                return (
-                    f"❓ Unknown help topic: `{topic}`\n\n"
-                    f"Available topics: {available}",
-                    True
-                )
+            available = ", ".join(sorted(HELP_TOPICS.keys()))
+            return (
+                f"❓ Unknown help topic: `{topic}`\n\n"
+                f"Available topics: {available}",
+                True
+            )
 
         # General help
         example_prompts = self._get_example_prompts()
