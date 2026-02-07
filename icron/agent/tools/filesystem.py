@@ -240,7 +240,7 @@ class EditFileTool(Tool):
             content = file_path.read_text(encoding="utf-8")
 
             if old_text not in content:
-                return f"Error: old_text not found in file. Make sure it matches exactly."
+                return "Error: old_text not found in file. Make sure it matches exactly."
 
             # Count occurrences
             count = content.count(old_text)
@@ -393,7 +393,7 @@ class RenameFileTool(Tool):
         except WorkspaceSecurityError as e:
             return f"Error: {e}"
         except PermissionError:
-            return f"Error: Permission denied"
+            return "Error: Permission denied"
         except Exception as e:
             return f"Error renaming: {str(e)}"
 
@@ -473,7 +473,7 @@ class MoveFileTool(Tool):
         except WorkspaceSecurityError as e:
             return f"Error: {e}"
         except PermissionError:
-            return f"Error: Permission denied"
+            return "Error: Permission denied"
         except Exception as e:
             return f"Error moving: {str(e)}"
 
@@ -557,7 +557,7 @@ class CopyFileTool(Tool):
         except WorkspaceSecurityError as e:
             return f"Error: {e}"
         except PermissionError:
-            return f"Error: Permission denied"
+            return "Error: Permission denied"
         except Exception as e:
             return f"Error copying: {str(e)}"
 
