@@ -188,7 +188,8 @@ class ExecTool(Tool):
                 return True
         return False
 
-    def _contains_dangerous_metacharacters(self, command: str) -> set[str]:
+    @staticmethod
+    def _contains_dangerous_metacharacters(command: str) -> set[str]:
         """Return set of dangerous metacharacters found in command."""
         found = set()
         for char in command:
