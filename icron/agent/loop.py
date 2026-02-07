@@ -7,6 +7,9 @@ from typing import Any, TYPE_CHECKING
 
 from loguru import logger
 
+# Default max context tokens when exec_config is not available
+DEFAULT_MAX_CONTEXT_TOKENS = 100_000
+
 # Type hint for MCPManager - imported at runtime in initialize()
 if TYPE_CHECKING:
     from icron.mcp.tool_adapter import MCPManager
@@ -472,7 +475,7 @@ class AgentLoop:
             self._reminder_tool.set_context(msg.channel, msg.chat_id)
         
         # Build initial messages (use get_history for LLM-formatted messages with token trimming)
-        max_tokens = self.exec_config.max_context_tokens if self.exec_config else 100000
+        max_tokens = self.exec_config.max_context_tokens if self.exec_config else DEFAULT_MAX_CONTEXT_TOKENS
         messages = self.context.build_messages(
             history=session.get_history(max_tokens=max_tokens),
             current_message=msg.content,
@@ -605,7 +608,7 @@ class AgentLoop:
             spawn_tool.set_context(origin_channel, origin_chat_id)
         
         # Build messages with the announce content (with token trimming)
-        max_tokens = self.exec_config.max_context_tokens if self.exec_config else 100000
+        max_tokens = self.exec_config.max_context_tokens if self.exec_config else DEFAULT_MAX_CONTEXT_TOKENS
         messages = self.context.build_messages(
             history=session.get_history(max_tokens=max_tokens),
             current_message=msg.content
