@@ -231,7 +231,7 @@ class LazyLLMProvider(LLMProvider):
             return parsed
         except Exception as e:
             return LLMResponse(
-                content=f"Error calling LLM: {str(e)}",
+                content=f"Error calling LLM: {e}",
                 finish_reason="error",
             )
 
