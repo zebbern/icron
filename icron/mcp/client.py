@@ -38,7 +38,7 @@ class MCPServerConnection:
 
         except Exception as e:
             logger.error(f"Error calling MCP tool {tool_name}: {e}")
-            return f"Error: {str(e)}"
+            return f"Error: {e}"
 
 
 class MCPClient:
