@@ -3,7 +3,7 @@
 import re
 from itertools import islice
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from icron.agent.tools.base import Tool
 from icron.agent.tools.filesystem import validate_workspace_path, WorkspaceSecurityError
@@ -21,7 +21,7 @@ class GlobTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
@@ -117,7 +117,7 @@ class GrepTool(Tool):
 
     def __init__(
         self,
-        workspace: Optional[Path] = None,
+        workspace: Path | None = None,
         restrict_to_workspace: bool = True,
     ):
         self.workspace = workspace
