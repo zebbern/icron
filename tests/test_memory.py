@@ -173,9 +173,9 @@ class TestMemoryStore:
 
         # Check that consecutive chunks share some content (overlap)
         if len(chunks) >= 2:
-            for i in range(len(chunks) - 1):
-                current_text = chunks[i]["text"]
-                next_text = chunks[i + 1]["text"]
+            for current, next_chunk in zip(chunks, chunks[1:]):
+                current_text = current["text"]
+                next_text = next_chunk["text"]
                 
                 # Find lines in current chunk
                 current_lines = set(line.strip() for line in current_text.split("\n") if line.strip())
