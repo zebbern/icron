@@ -103,7 +103,7 @@ class LazyLLMProvider(LLMProvider):
         conversation: list[dict[str, Any]] = []
 
         for msg in messages:
-            role = msg.get("role")
+            role = msg.get("role", "user")
             if role == "system":
                 content = msg.get("content", "")
                 if isinstance(content, str):
