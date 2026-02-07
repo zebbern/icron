@@ -12,7 +12,7 @@
 > [!note]
 > icron is a lightweight personal AI assistant built for simplicity and extensibility.
 > 
-> - Multi-platform support (Discord, Telegram, WhatsApp)
+> - Multi-platform support (Discord, Telegram, WhatsApp, Slack, Feishu)
 > - Works with any OpenAI-compatible LLM (Anthropic, OpenRouter, Together, Groq, vLLM)
 > - Built-in tools: file operations, web search, shell execution, memory, scheduling
 > 
@@ -34,7 +34,7 @@
 ## Key Features
 
 - **Semantic Memory**: OpenClaw-style permanent Markdown memory with hybrid BM25 + vector search. Auto-detects embedding providers (OpenAI, Gemini, Ollama).
-- **Multi-Channel**: Chat through Discord, Telegram, or WhatsApp with unified conversation history.
+- **Multi-Channel**: Chat through Discord, Telegram, WhatsApp, Slack, or Feishu with unified conversation history.
 - **LLM Flexibility**: Works with any OpenAI-compatible provider including local vLLM/Ollama.
 - **MCP Integration**: Extend capabilities by connecting external MCP servers.
 - **Skills System**: Modular task automation with built-in and custom skills.
@@ -128,13 +128,15 @@ icron agent -m "Hello from my local LLM!"
 
 ## Chat Channels
 
-Talk to icron through Telegram, WhatsApp, or Discord.
+Talk to icron through Telegram, WhatsApp, Discord, Slack, or Feishu.
 
 | Channel | Status | Setup |
 |---------|--------|-------|
 | **Discord** | ✅ Full support | Easy (bot token) |
 | **Telegram** | ✅ Full support + voice | Easy (bot token) |
 | **WhatsApp** | ✅ Basic support | Medium (QR scan) |
+| **Slack** | ✅ Full support | Medium (Socket Mode) |
+| **Feishu/Lark** | ✅ Full support | Medium (WebSocket) |
 
 <details>
 <summary><b>Discord Setup</b></summary>
@@ -326,6 +328,7 @@ Quick commands that bypass the LLM for instant response:
 | `/weather [location]` | Get weather for a location |
 | `/templates` | List available templates |
 | `/template [name]` | Run a template by name |
+| `/collab [task]` | Multi-model collaboration |
 
 ## MCP Server Support
 
@@ -455,6 +458,9 @@ Config file: `~/.icron/config.json`
 | `providers.anthropic.apiKey` | string | Anthropic API key |
 | `providers.together.apiKey` | string | Together AI API key |
 | `providers.groq.apiKey` | string | Groq API key (for voice) |
+| `providers.openai.apiKey` | string | OpenAI API key |
+| `providers.gemini.apiKey` | string | Google Gemini API key |
+| `providers.zhipu.apiKey` | string | Zhipu AI API key |
 | `tools.exec.timeout` | int | Shell command timeout (seconds) |
 | `tools.exec.restrictToWorkspace` | bool | Limit file access to workspace |
 | `tools.exec.maxContextTokens` | int | Max tokens for conversation history |
@@ -569,7 +575,7 @@ icron/
 │   ├── memory.py   # Persistent memory
 │   ├── subagent.py # Background task execution
 │   └── tools/      # Built-in tools
-├── channels/       # Discord, Telegram, WhatsApp
+├── channels/       # Discord, Telegram, WhatsApp, Slack, Feishu
 ├── bus/            # Message routing
 ├── cron/           # Scheduled tasks
 ├── heartbeat/      # Proactive checks
