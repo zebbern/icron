@@ -221,7 +221,7 @@ class ExecTool(Tool):
 
         # Extract the base command name (without path)
         executable = args[0]
-        base_cmd = os.path.basename(executable)
+        base_cmd = Path(executable).name
 
         return base_cmd, args
 
