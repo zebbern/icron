@@ -73,7 +73,7 @@ class MCPToolAdapter(Tool):
         try:
             return await self._client.call_tool(self._full_name, kwargs)
         except Exception as e:
-            return f"Error executing MCP tool {self._full_name}: {str(e)}"
+            return f"Error executing MCP tool {self._full_name}: {e}"
 
 
 class MCPManager:
