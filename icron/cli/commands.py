@@ -1910,7 +1910,7 @@ def status():
         if config.tools.mcp.enabled:
             mcp_count = len(config.tools.mcp.servers)
             console.print(f"MCP: [green]✓ enabled ({mcp_count} servers)[/green]")
-            for name in config.tools.mcp.servers.keys():
+            for name in config.tools.mcp.servers:
                 console.print(f"  - {name}")
         else:
             console.print("MCP: [dim]disabled[/dim]")
