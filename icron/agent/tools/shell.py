@@ -213,7 +213,7 @@ class ExecTool(Tool):
         try:
             args = shlex.split(command)
         except ValueError as e:
-            raise ShellSecurityError(f"Failed to parse command: {e}")
+            raise ShellSecurityError(f"Failed to parse command: {e}") from e
 
         if not args:
             raise ShellSecurityError("Empty command")

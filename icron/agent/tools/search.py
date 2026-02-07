@@ -132,7 +132,7 @@ class GrepTool(Tool):
         try:
             return re.compile(pattern, flags)
         except re.error as e:
-            raise ValueError(f"Invalid regex pattern: {e}")
+            raise ValueError(f"Invalid regex pattern: {e}") from e
 
     def _should_skip_file(self, file_path: Path) -> bool:
         """Check if file should be skipped (binary or too large) (HIGH-3)."""
