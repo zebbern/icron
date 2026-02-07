@@ -48,9 +48,9 @@ class Transport(ABC):
         """Close connection and cleanup resources."""
         pass
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "Transport":
         await self.connect()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.disconnect()
