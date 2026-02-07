@@ -1,11 +1,14 @@
 """Configuration loading utilities."""
 
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
 from icron.config.schema import Config
 from icron.utils.helpers import get_data_path
+
+logger = logging.getLogger(__name__)
 
 
 def get_config_path() -> Path:
@@ -36,8 +39,8 @@ def load_config(config_path: Path | None = None) -> Config:
                 data = json.load(f)
             return Config.model_validate(convert_keys(data))
         except (json.JSONDecodeError, ValueError) as e:
-            print(f"Warning: Failed to load config from {path}: {e}")
-            print("Using default configuration.")
+            logger.warning("Failed to load config from %s: %s", path, e)
+            logger.warning("Using default configuration.")
     
     return Config()
 
